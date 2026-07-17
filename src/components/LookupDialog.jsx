@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { formatValue } from '../utils/formatters'
 import { filterRows } from '../utils/tableFilters'
 
@@ -15,13 +15,6 @@ export function LookupDialog({
 }) {
   const [query, setQuery] = useState('')
   const [draft, setDraft] = useState(selectedRow)
-
-  useEffect(() => {
-    if (open) {
-      setQuery('')
-      setDraft(selectedRow)
-    }
-  }, [open, selectedRow])
 
   const visibleRows = useMemo(
     () => filterRows(rows, query, columns),

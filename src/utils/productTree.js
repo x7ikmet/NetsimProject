@@ -1,18 +1,6 @@
 import { getVaryantsOfVaryant } from '../api/stokApi'
 
-const MAX_TREE_DEPTH = 8
-
-export function flattenTree(nodes, expandedIds, level = 0) {
-  return nodes.flatMap((node) => {
-    const row = [{ ...node, level }]
-
-    if (node.children?.length && expandedIds.has(node.treeId)) {
-      row.push(...flattenTree(node.children, expandedIds, level + 1))
-    }
-
-    return row
-  })
-}
+const MAX_TREE_DEPTH = 50
 
 export function collectExpandedIds(nodes) {
   return nodes.flatMap((node) => [
@@ -22,7 +10,8 @@ export function collectExpandedIds(nodes) {
 }
 
 export function createRootTreeNode(selectedStock, selectedVariant, children) {
-  return {
+  return withChildren(
+    {
     treeId: `root-${selectedVariant.STOK_VARYANT_NO}`,
     rowNo: 1,
     STOK_TIP_ADI: selectedStock?.STOK_TIP_ADI,
@@ -33,8 +22,9 @@ export function createRootTreeNode(selectedStock, selectedVariant, children) {
     MIKTAR: selectedVariant.MIKTAR,
     MIKTAR1: selectedVariant.MIKTAR,
     BIRIM: selectedVariant.BIRIM,
+    },
     children,
-  }
+  )
 }
 
 export async function buildProductTree(variantNo, path = new Set(), depth = 0) {
@@ -55,12 +45,22 @@ export async function buildProductTree(variantNo, path = new Set(), depth = 0) {
         ? await buildProductTree(childVariantNo, nextPath, depth + 1)
         : []
 
-      return {
-        ...row,
-        rowNo: row.SIRA_NO ?? index + 1,
-        treeId: `${variantNo}-${row.STOK_DETAY_NO ?? index}-${childVariantNo}`,
+      return withChildren(
+        {
+          ...row,
+          rowNo: row.SIRA_NO ?? index + 1,
+          treeId: `${variantNo}-${row.STOK_DETAY_NO ?? index}-${childVariantNo}`,
+        },
         children,
-      }
+      )
     }),
   )
+}
+
+function withChildren(row, children) {
+  if (!children?.length) {
+    return row
+  }
+
+  return { ...row, children }
 }

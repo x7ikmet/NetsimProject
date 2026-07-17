@@ -1,17 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import './App.css'
 import { getStokKartlar, getVaryantsByStokId } from './api/stokApi'
 import { LookupDialog } from './components/LookupDialog'
-import { ProductTreeTable } from './components/ProductTreeTable'
+import { BomStudioTable } from './components/BomStudioTable'
 import { SelectorField } from './components/SelectorField'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { stockColumns, variantColumns } from './config/tableColumns'
 import { getStockLabel, getVariantLabel } from './utils/formatters'
 import {
   buildProductTree,
   collectExpandedIds,
   createRootTreeNode,
-  flattenTree,
-} from './utils/productTree'
+} from './utils/productTree'    
 
 const initialLoadingState = {
   stocks: false,
@@ -30,11 +30,6 @@ function App() {
   const [variantDialogOpen, setVariantDialogOpen] = useState(false)
   const [loading, setLoading] = useState(initialLoadingState)
   const [message, setMessage] = useState('')
-
-  const visibleTreeRows = useMemo(
-    () => flattenTree(tree, expandedIds),
-    [tree, expandedIds],
-  )
 
   async function openStockDialog() {
     setMessage('')
@@ -127,6 +122,14 @@ function App() {
     })
   }
 
+  function expandTree() {
+    setExpandedIds(new Set(collectExpandedIds(tree)))
+  }
+
+  function collapseTree() {
+    setExpandedIds(new Set())
+  }
+
   function clearTree() {
     setTree([])
     setExpandedIds(new Set())
@@ -173,47 +176,54 @@ function App() {
       {message ? <div className="notice">{message}</div> : null}
 
       <section className="result-panel">
-        <div className="tab-bar">
-          <button type="button" className="active">
-            Ürün Ağacı
-          </button>
-        </div>
+        <Tabs defaultValue="studio" className="result-tabs">
 
-        <ProductTreeTable
-          rows={visibleTreeRows}
-          expandedIds={expandedIds}
-          onToggle={toggleRow}
-          emptyText={
-            loading.tree
-              ? 'Ürün ağacı yükleniyor...'
-              : 'Stok ve varyant seçip Bul butonuna basınız.'
-          }
-        />
+          <TabsContent value="studio" className="result-tab-content">
+            <BomStudioTable
+              rows={tree}
+              expandedIds={expandedIds}
+              onToggle={toggleRow}
+              onExpandAll={expandTree}
+              onCollapseAll={collapseTree}
+              emptyText={
+                loading.tree
+                  ? 'Ürün ağacı yükleniyor...'
+                  : 'Stok ve varyant seçip Bul butonuna basınız.'
+              }
+            />
+          </TabsContent>
+
+          
+        </Tabs>
       </section>
 
-      <LookupDialog
-        title="Stok Kart Seçimi"
-        description="ERP sisteminden gelen stok kartları içinden seçim yapın."
-        open={stockDialogOpen}
-        rows={stocks}
-        columns={stockColumns}
-        loading={loading.stocks}
-        selectedRow={selectedStock}
-        onClose={() => setStockDialogOpen(false)}
-        onSelect={selectStock}
-      />
+      {stockDialogOpen ? (
+        <LookupDialog
+          title="Stok Kart Seçimi"
+          description="ERP sisteminden gelen stok kartları içinden seçim yapın."
+          open={stockDialogOpen}
+          rows={stocks}
+          columns={stockColumns}
+          loading={loading.stocks}
+          selectedRow={selectedStock}
+          onClose={() => setStockDialogOpen(false)}
+          onSelect={selectStock}
+        />
+      ) : null}
 
-      <LookupDialog
-        title="Stok Varyantı Seçimi"
-        description="Seçili stok kartına bağlı varyantlar."
-        open={variantDialogOpen}
-        rows={variants}
-        columns={variantColumns}
-        loading={loading.variants}
-        selectedRow={selectedVariant}
-        onClose={() => setVariantDialogOpen(false)}
-        onSelect={selectVariant}
-      />
+      {variantDialogOpen ? (
+        <LookupDialog
+          title="Stok Varyantı Seçimi"
+          description="Seçili stok kartına bağlı varyantlar."
+          open={variantDialogOpen}
+          rows={variants}
+          columns={variantColumns}
+          loading={loading.variants}
+          selectedRow={selectedVariant}
+          onClose={() => setVariantDialogOpen(false)}
+          onSelect={selectVariant}
+        />
+      ) : null}
     </main>
   )
 }

@@ -1,5 +1,5 @@
 export const treeColumns = [
-  { key: 'rowNo', label: 'Satır No', width: '84px' },
+  { key: 'rowNo', label: 'Satır No', width: '132px' },
   { key: 'STOK_TIP_ADI', label: 'Stok Tipi', width: '170px' },
   { key: 'STOK_NO', label: 'Stok No', width: '96px' },
   { key: 'STOK_ADI', label: 'Stok Adı', width: '260px' },
