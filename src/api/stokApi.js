@@ -61,6 +61,7 @@ export function getVaryantsByStokId(stokNo) {
 export function getVaryantsOfVaryant(anaStokVaryantNo) {
   return requestJson('/FastAPI/Stok/VaryantsOfVaryant', {
     method: 'POST',
+    cache: 'no-store',
     body: JSON.stringify({ ANA_STOK_VARYANT_NO: anaStokVaryantNo }),
   })
 }

@@ -501,7 +501,7 @@ button:disabled {
 }
 
 .bom-modern-table {
-  min-width: 1040px;
+  min-width: 1260px;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -532,20 +532,41 @@ button:disabled {
 }
 
 .bom-line-cell {
-  width: 90px;
+  width: 78px;
 }
 
-.bom-line-code {
+.bom-line-code,
+.bom-level-badge {
   display: inline-flex;
-  min-width: 42px;
   justify-content: center;
-  border: 1px solid #cbd5e1;
-  border-radius: 5px;
   padding: 2px 6px;
-  background: #ffffff;
   color: #334155;
   font-size: 12px;
   font-weight: 800;
+}
+
+.bom-line-code {
+  min-width: 42px;
+}
+
+.bom-level-cell {
+  width: 86px;
+}
+
+.bom-level-badge {
+  min-width: 34px;
+}
+
+.bom-stock-code {
+  display: inline-block;
+  max-width: 150px;
+  overflow: hidden;
+  color: #111827;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bom-stock-cell {

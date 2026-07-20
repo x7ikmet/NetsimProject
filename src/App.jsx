@@ -102,7 +102,10 @@ function App() {
       const nodes = [createRootTreeNode(selectedStock, selectedVariant, children)]
 
       setTree(nodes)
-      setExpandedIds(new Set(collectExpandedIds(nodes)))
+      
+      // Expand The Tree
+      setExpandedIds(new Set())
+      //setExpandedIds(new Set(collectExpandedIds(nodes)))
 
       if (!children.length) {
         setMessage('Seçilen varyant için ürün ağacı kaydı bulunamadı.')

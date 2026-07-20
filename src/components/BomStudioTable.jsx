@@ -3,7 +3,6 @@ import {
   ChevronDown,
   ChevronRight,
 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -33,20 +32,17 @@ export function BomStudioTable({
   const [selectedId, setSelectedId] = useState('')
 
   const allRows = useMemo(() => flattenTree(rows), [rows])
-  const maxDepth = useMemo(
-    () => allRows.reduce((max, row) => Math.max(max, row.depth), 0),
+  const visibleRows = useMemo(
+    () => flattenTree(rows, expandedIds),
+    [expandedIds, rows],
+  )
+  const rowsById = useMemo(
+    () => new Map(allRows.map((row) => [row.treeId, row])),
     [allRows],
   )
 
-  const sourceRows = flattenTree(rows, expandedIds)
-
-  const visibleRows = useMemo(
-    () => sourceRows.filter((row) => row.depth <= maxDepth),
-    [maxDepth, sourceRows],
-  )
-
   const selectedRow =
-    allRows.find((row) => row.treeId === selectedId) ?? visibleRows[0] ?? null
+    rowsById.get(selectedId) ?? visibleRows[0] ?? null
 
   if (!rows.length) {
     return (
@@ -73,11 +69,14 @@ export function BomStudioTable({
                   <TableHeader>
                     <TableRow>
                       <TableHead>Satır</TableHead>
-                      <TableHead>Stok</TableHead>
-                      <TableHead>Varyant</TableHead>
+                      <TableHead>Stok Kodu</TableHead>
+                      <TableHead>Stok Adı</TableHead>
+                      <TableHead>Varyant Kodu</TableHead>
+                      <TableHead>Varyant Adı</TableHead>
                       <TableHead className="align-right">Miktar</TableHead>
                       <TableHead>Birim</TableHead>
                       <TableHead className="align-right">Maliyet</TableHead>
+                      <TableHead className="align-right">Seviye</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -90,6 +89,10 @@ export function BomStudioTable({
                         >
                           <TableCell className="bom-line-cell">
                             <span className="bom-line-code">{rowIndex + 1}</span>
+                          </TableCell>
+                          
+                          <TableCell>
+                            <span className="bom-stock-code">{formatValue(row.STOK_KODU)}</span>
                           </TableCell>
                           <TableCell>
                             <div className="bom-stock-cell" style={{ '--depth': row.depth }}>
@@ -115,26 +118,29 @@ export function BomStudioTable({
                               )}
                               <div>
                                 <strong>{formatValue(row.STOK_ADI)}</strong>
-                                <span>{formatValue(row.STOK_TIP_ADI)}</span>
+                                <span>{formatValue(row.STOK_TIP_ADI ?? row.STOK_NO)}</span>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
+                              <span>{formatValue(row.VARYANT_KODU)}</span>
+                          </TableCell>
+                          <TableCell>
                             <div className="bom-variant-cell">
-                              <Badge variant={row.depth === 0 ? 'default' : 'outline'}>
-                                {formatValue(row.STOK_VARYANT_NO)}
-                              </Badge>
-                              <span>{formatValue(row.ACIKLAMA)}</span>
+                              <span>{formatValue(row.VARYANT_ADI)}</span>
                             </div>
                           </TableCell>
                           <TableCell className="align-right">{formatValue(row.MIKTAR)}</TableCell>
                           <TableCell>{formatValue(row.BIRIM)}</TableCell>
                           <TableCell className="align-right">{formatValue(row.TUTAR)}</TableCell>
+                          <TableCell className="bom-level-cell align-right">
+                            <span className="bom-level-badge">{formatValue(row.level)}</span>
+                          </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6}>
+                        <TableCell colSpan={8}>
                           <div className="bom-no-results">BOM satırı bulunamadı.</div>
                         </TableCell>
                       </TableRow>
@@ -160,14 +166,19 @@ function flattenTree(nodes, expandedIds, depth = 0, prefix = '') {
     const row = {
       ...node,
       depth,
+      level: node.SEVIYE ?? depth,
       path,
       hasChildren: children.length > 0,
       expanded,
       searchText: [
+        node.SEVIYE ?? depth,
         node.STOK_TIP_ADI,
         node.STOK_NO,
+        node.STOK_KODU,
         node.STOK_ADI,
         node.STOK_VARYANT_NO,
+        node.VARYANT_KODU,
+        node.VARYANT_ADI,
         node.ACIKLAMA,
         node.BIRIM,
       ]
