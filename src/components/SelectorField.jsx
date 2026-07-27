@@ -1,19 +1,42 @@
-export function SelectorField({ label, value, placeholder, onOpen, disabled }) {
+import { Field, FieldLabel } from '@/components/ui/field'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group'
+
+export function SelectorField({
+  className,
+  id,
+  label,
+  value,
+  placeholder,
+  onOpen,
+  disabled,
+}) {
   return (
-    <label className="selector-field">
-      <span>{label}</span>
-      <div className="selector-control">
-        <input className="field-input" value={value} placeholder={placeholder} readOnly />
-        <button
-          className="ellipsis-button"
-          type="button"
-          onClick={onOpen}
+    <Field className={className} data-disabled={disabled || undefined}>
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      <InputGroup>
+        <InputGroupInput
+          id={id}
+          value={value}
+          placeholder={placeholder}
           disabled={disabled}
-          title={`${label} seç`}
-        >
-          ...
-        </button>
-      </div>
-    </label>
+          readOnly
+        />
+        <InputGroupAddon>
+          <InputGroupButton
+            onClick={onOpen}
+            disabled={disabled}
+            title={`${label} seç`}
+            aria-label={`${label} seç`}
+          >
+            ...
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
+    </Field>
   )
 }

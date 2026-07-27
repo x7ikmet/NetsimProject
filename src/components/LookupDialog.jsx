@@ -1,4 +1,7 @@
 import { useMemo, useState } from 'react'
+import { X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { formatValue } from '../utils/formatters'
 import { filterRows } from '../utils/tableFilters'
 
@@ -31,17 +34,22 @@ export function LookupDialog({
             <h2>{title}</h2>
             <p>{description}</p>
           </div>
-          <button className="icon-button" type="button" onClick={onClose}>
-            x
-          </button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            aria-label="Pencereyi kapat"
+          >
+            <X />
+          </Button>
         </div>
 
         <div className="modal-toolbar">
-          <input
+          <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Ara..."
-            className="field-input"
             autoFocus
           />
           <span className="muted-label">{visibleRows.length} kayıt</span>
@@ -87,17 +95,16 @@ export function LookupDialog({
         </div>
 
         <div className="modal-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>
+          <Button variant="outline" type="button" onClick={onClose}>
             Vazgeç
-          </button>
-          <button
-            className="primary-button"
+          </Button>
+          <Button
             type="button"
             disabled={!draft}
             onClick={() => onSelect(draft)}
           >
             Seç
-          </button>
+          </Button>
         </div>
       </section>
     </div>

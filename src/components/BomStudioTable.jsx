@@ -57,7 +57,9 @@ export function BomStudioTable({ rows, expandedIds, onToggle, emptyText }) {
                     <TableHead>Varyant Adı</TableHead>
                     <TableHead className="align-right">Miktar</TableHead>
                     <TableHead>Birim</TableHead>
-                    <TableHead className="align-right">Maliyet</TableHead>
+                    <TableHead className="align-right">Birim Fiyat</TableHead>
+                    <TableHead className="align-right">Tutar</TableHead>
+                    <TableHead className="align-right">Ana Maliyet</TableHead>
                     <TableHead className="align-right">Seviye</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -147,7 +149,13 @@ export function BomStudioTable({ rows, expandedIds, onToggle, emptyText }) {
                         </TableCell>
                         <TableCell>{formatValue(row.BIRIM)}</TableCell>
                         <TableCell className="align-right">
+                          {formatValue(row.BIRIM_FIYAT)}
+                        </TableCell>
+                        <TableCell className="align-right">
                           {formatValue(row.TUTAR)}
+                        </TableCell>
+                        <TableCell className="align-right">
+                          {formatValue(row.ANA_MALIYET)}
                         </TableCell>
                         <TableCell className="bom-level-cell align-right">
                           <span className="bom-level-badge">
@@ -158,7 +166,7 @@ export function BomStudioTable({ rows, expandedIds, onToggle, emptyText }) {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={9}>
+                      <TableCell colSpan={11}>
                         <div className="bom-no-results">BOM satırı bulunamadı.</div>
                       </TableCell>
                     </TableRow>

@@ -1,29 +1,9 @@
-import { getProductTree } from '../api/stokApi'
+import { getProductTreeV2 } from '../api/stokApi'
 
-export function createRootTreeNode(selectedStock, selectedVariant, children) {
-  const root = {
-    treeId: `root-${selectedVariant.STOK_VARYANT_NO}`,
-    rowNo: 1,
-    STOK_TIP_ADI: selectedStock?.STOK_TIP_ADI,
-    STOK_NO: selectedStock?.STOK_NO,
-    STOK_KODU: selectedStock?.STOK_KODU,
-    STOK_ADI: selectedStock?.STOK_ADI,
-    STOK_VARYANT_NO: selectedVariant.STOK_VARYANT_NO,
-    VARYANT_KODU: selectedVariant.VARYANT_KODU,
-    VARYANT_ADI: selectedVariant.VARYANT_ADI,
-    ACIKLAMA: selectedVariant.VARYANT_ADI,
-    MIKTAR: selectedVariant.MIKTAR,
-    MIKTAR1: selectedVariant.MIKTAR,
-    BIRIM: selectedVariant.BIRIM,
-  }
+export async function buildProductTree({ stokVaryantNo, birim, miktar }) {
+  if (!stokVaryantNo) return []
 
-  return children.length ? { ...root, children } : root
-}
-
-export async function buildProductTree(variantNo) {
-  if (!variantNo) return []
-
-  const rows = await getProductTree(variantNo)
+  const rows = await getProductTreeV2({ stokVaryantNo, birim, miktar })
   if (!rows.length) return []
 
   const normalizeLevel = (value) => {
@@ -57,13 +37,14 @@ export async function buildProductTree(variantNo) {
     stack.length = level + 1
   })
 
-  const root = roots.find(
-    (node) =>
-      Number(node.STOK_VARYANT_NO) === Number(variantNo) &&
-      normalizeLevel(node.SEVIYE) === 0,
-  )
+  return prioritizeParents(roots)
+}
 
-  return prioritizeParents(root ? root.children : roots)
+export function collectExpandableIds(nodes) {
+  return nodes.flatMap((node) => {
+    if (!node.children?.length) return []
+    return [node.treeId, ...collectExpandableIds(node.children)]
+  })
 }
 
 function prioritizeParents(nodes) {

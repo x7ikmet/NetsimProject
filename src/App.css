@@ -47,81 +47,93 @@
 }
 
 .search-panel {
-  display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(240px, 1fr) 132px;
-  align-items: end;
-  gap: 14px;
   border-radius: 8px;
   padding: 16px;
 }
 
-.selector-field {
+.search-fields {
   display: grid;
-  gap: 7px;
-  min-width: 0;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: end;
+  gap: 14px 12px;
 }
 
-.selector-field > span,
-.muted-label {
-  color: #475569;
-  font-size: 12px;
-  font-weight: 700;
+.search-stock,
+.search-variant {
+  grid-column: span 6;
 }
 
-.selector-control {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 42px;
-  border: 1px solid #b8c4d4;
-  border-radius: 6px;
-  overflow: hidden;
-  background: #ffffff;
+.search-unit,
+.search-quantity,
+.tree-actions,
+.search-action {
+  grid-column: span 2;
 }
 
-.field-input {
+.search-cost-method {
+  grid-column: span 6;
+}
+
+.search-panel [data-slot="select-trigger"] {
   width: 100%;
-  min-width: 0;
-  height: 40px;
-  border: 1px solid #b8c4d4;
-  border-radius: 6px;
-  padding: 0 11px;
-  background: #ffffff;
-  color: #172033;
-  font: inherit;
-  outline: none;
 }
 
-.selector-control .field-input {
-  border: 0;
-  border-radius: 0;
+.tree-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
 }
 
-.field-input:focus,
-.selector-control:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+.search-action {
+  width: 100%;
 }
 
-.ellipsis-button,
-.icon-button {
-  display: inline-grid;
-  place-items: center;
-  border: 0;
-  background: #eef3f8;
-  color: #243149;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
-}
+@media (min-width: 1001px) {
+  .search-panel {
+    width: 954px;
+    max-width: 100%;
+  }
 
-.ellipsis-button {
-  border-left: 1px solid #b8c4d4;
-  font-size: 18px;
-}
+  .search-fields {
+    grid-template-columns: 160px 160px minmax(300px, 380px) 184px;
+    max-width: 920px;
+  }
 
-.ellipsis-button:hover,
-.icon-button:hover {
-  background: #dbeafe;
-  color: #1d4ed8;
+  .search-stock {
+    grid-column: 1 / span 2;
+    grid-row: 1;
+  }
+
+  .search-variant {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .search-unit {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .search-quantity {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .search-cost-method {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  .tree-actions {
+    grid-column: 4;
+    grid-row: 1;
+    align-self: end;
+  }
+
+  .search-action {
+    grid-column: 4;
+    grid-row: 2;
+  }
 }
 
 button:disabled {
@@ -129,37 +141,10 @@ button:disabled {
   opacity: 0.55;
 }
 
-.find-button,
-.primary-button,
-.secondary-button {
-  height: 40px;
-  border-radius: 6px;
-  padding: 0 18px;
-  font: inherit;
-  font-weight: 750;
-  cursor: pointer;
-}
-
-.find-button,
-.primary-button {
-  border: 1px solid #1d4ed8;
-  background: #2563eb;
-  color: #ffffff;
-}
-
-.find-button:hover,
-.primary-button:hover {
-  background: #1d4ed8;
-}
-
-.secondary-button {
-  border: 1px solid #b8c4d4;
-  background: #ffffff;
-  color: #243149;
-}
-
-.secondary-button:hover {
-  background: #f1f5f9;
+.muted-label {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .notice {
@@ -676,15 +661,8 @@ button:disabled {
   background: #f8fafc;
 }
 
-.modal-toolbar .field-input {
+.modal-toolbar [data-slot="input"] {
   max-width: 420px;
-}
-
-.icon-button {
-  width: 34px;
-  height: 34px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
 }
 
 .lookup-table-wrap {
@@ -705,17 +683,36 @@ button:disabled {
   background: #f8fafc;
 }
 
+@media (min-width: 861px) and (max-width: 1000px) {
+  .search-unit,
+  .search-quantity {
+    grid-column: span 3;
+  }
+
+  .search-cost-method {
+    grid-column: span 4;
+  }
+}
+
 @media (max-width: 860px) {
   .erp-page {
     padding: 14px;
   }
 
-  .search-panel {
-    grid-template-columns: 1fr;
+  .search-stock,
+  .search-variant,
+  .search-cost-method {
+    grid-column: span 12;
   }
 
-  .find-button {
-    width: 100%;
+  .search-unit,
+  .search-quantity {
+    grid-column: span 6;
+  }
+
+  .tree-actions,
+  .search-action {
+    grid-column: span 12;
   }
 
   .page-header {
