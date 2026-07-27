@@ -4,14 +4,9 @@ import { getStokKartlar, getVaryantsByStokId } from './api/stokApi'
 import { LookupDialog } from './components/LookupDialog'
 import { BomStudioTable } from './components/BomStudioTable'
 import { SelectorField } from './components/SelectorField'
-import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { stockColumns, variantColumns } from './config/tableColumns'
 import { getStockLabel, getVariantLabel } from './utils/formatters'
-import {
-  buildProductTree,
-  collectExpandedIds,
-  createRootTreeNode,
-} from './utils/productTree'    
+import { buildProductTree, createRootTreeNode } from './utils/productTree'
 
 const initialLoadingState = {
   stocks: false,
@@ -102,10 +97,10 @@ function App() {
       const nodes = [createRootTreeNode(selectedStock, selectedVariant, children)]
 
       setTree(nodes)
-      
-      // Expand The Tree
       setExpandedIds(new Set())
-      //setExpandedIds(new Set(collectExpandedIds(nodes)))
+
+      // Expand The Tree
+      // setExpandedIds(new Set(collectExpandedIds(nodes)))
 
       if (!children.length) {
         setMessage('Seçilen varyant için ürün ağacı kaydı bulunamadı.')
@@ -123,14 +118,6 @@ function App() {
       next.has(treeId) ? next.delete(treeId) : next.add(treeId)
       return next
     })
-  }
-
-  function expandTree() {
-    setExpandedIds(new Set(collectExpandedIds(tree)))
-  }
-
-  function collapseTree() {
-    setExpandedIds(new Set())
   }
 
   function clearTree() {
@@ -179,25 +166,16 @@ function App() {
       {message ? <div className="notice">{message}</div> : null}
 
       <section className="result-panel">
-        <Tabs defaultValue="studio" className="result-tabs">
-
-          <TabsContent value="studio" className="result-tab-content">
-            <BomStudioTable
-              rows={tree}
-              expandedIds={expandedIds}
-              onToggle={toggleRow}
-              onExpandAll={expandTree}
-              onCollapseAll={collapseTree}
-              emptyText={
-                loading.tree
-                  ? 'Ürün ağacı yükleniyor...'
-                  : 'Stok ve varyant seçip Bul butonuna basınız.'
-              }
-            />
-          </TabsContent>
-
-          
-        </Tabs>
+        <BomStudioTable
+          rows={tree}
+          expandedIds={expandedIds}
+          onToggle={toggleRow}
+          emptyText={
+            loading.tree
+              ? 'Ürün ağacı yükleniyor...'
+              : 'Stok ve varyant seçip Bul butonuna basınız.'
+          }
+        />
       </section>
 
       {stockDialogOpen ? (

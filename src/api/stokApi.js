@@ -65,3 +65,11 @@ export function getVaryantsOfVaryant(anaStokVaryantNo) {
     body: JSON.stringify({ ANA_STOK_VARYANT_NO: anaStokVaryantNo }),
   })
 }
+
+export function getProductTree(stokVaryantNo) {
+  return requestJson('/FastAPI/Stok/UrunAgaci', {
+    method: 'POST',
+    cache: 'no-store',
+    body: JSON.stringify({ STOK_VARYANT_NO: stokVaryantNo }),
+  })
+}
