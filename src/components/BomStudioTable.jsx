@@ -166,6 +166,7 @@ export function BomStudioTable({
                             <RowVariantSelector
                               row={row}
                               loading={updatingRowId === row.treeId}
+                              disabled={Boolean(updatingRowId)}
                               onOpen={() => onVariantOpen(row)}
                             />
                           </div>
@@ -208,8 +209,8 @@ export function BomStudioTable({
   )
 }
 
-function RowVariantSelector({ row, loading, onOpen }) {
-  const disabled = loading || !row.STOK_NO
+function RowVariantSelector({ row, loading, disabled, onOpen }) {
+  const selectorDisabled = disabled || !row.STOK_NO
   const label = row.VARYANT_ADI
     ? `${row.VARYANT_ADI} varyantını değiştir`
     : 'Satır varyantı seç'
@@ -224,7 +225,7 @@ function RowVariantSelector({ row, loading, onOpen }) {
         value={row.VARYANT_ADI ?? ''}
         placeholder="Varyant seç"
         readOnly
-        disabled={disabled}
+        disabled={selectorDisabled}
         aria-label={label}
         onClick={onOpen}
         onKeyDown={(event) => {
@@ -237,7 +238,7 @@ function RowVariantSelector({ row, loading, onOpen }) {
       <InputGroupAddon>
         <InputGroupButton
           onClick={onOpen}
-          disabled={disabled}
+          disabled={selectorDisabled}
           title={label}
           aria-label={label}
         >

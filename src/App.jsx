@@ -128,7 +128,9 @@ function App() {
 
     closeRowVariantDialog()
 
-    if (variant.STOK_VARYANT_NO === targetRow.STOK_VARYANT_NO) {
+    if (
+      String(variant.STOK_VARYANT_NO) === String(targetRow.STOK_VARYANT_NO)
+    ) {
       return
     }
 
@@ -431,7 +433,8 @@ function App() {
           selectedRow={
             rowVariants.find(
               (variant) =>
-                variant.STOK_VARYANT_NO === editingRow.STOK_VARYANT_NO,
+                String(variant.STOK_VARYANT_NO) ===
+                String(editingRow.STOK_VARYANT_NO),
             ) ?? null
           }
           onClose={closeRowVariantDialog}
