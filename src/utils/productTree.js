@@ -47,6 +47,38 @@ export function collectExpandableIds(nodes) {
   })
 }
 
+export function replaceTreeVariant(nodes, treeId, replacement) {
+  let replaced = false
+  let costDelta = 0
+
+  const nextNodes = nodes.map((node) => {
+    if (node.treeId === treeId) {
+      const nextNode = rebaseReplacementTree(node, replacement)
+      replaced = true
+      costDelta =
+        getNumericCost(nextNode.ANA_MALIYET) -
+        getNumericCost(node.ANA_MALIYET)
+      return nextNode
+    }
+
+    if (!node.children?.length) return node
+
+    const childResult = replaceTreeVariant(node.children, treeId, replacement)
+    if (!childResult.replaced) return node
+
+    replaced = true
+    costDelta = childResult.costDelta
+
+    return {
+      ...node,
+      ANA_MALIYET: applyCostDelta(node.ANA_MALIYET, costDelta),
+      children: childResult.nodes,
+    }
+  })
+
+  return { nodes: nextNodes, replaced, costDelta }
+}
+
 function prioritizeParents(nodes) {
   return nodes
     .map(({ children, ...node }) =>
@@ -58,4 +90,61 @@ function prioritizeParents(nodes) {
       (a, b) =>
         Number(Boolean(b.children?.length)) - Number(Boolean(a.children?.length)),
     )
+}
+
+function rebaseReplacementTree(currentNode, replacement) {
+  const currentLevel = normalizeTreeLevel(currentNode.SEVIYE)
+
+  return {
+    ...replacement,
+    STOK_DETAY_NO: currentNode.STOK_DETAY_NO,
+    ANA_STOK_VARYANT_NO: currentNode.ANA_STOK_VARYANT_NO,
+    ACIKLAMA: currentNode.ACIKLAMA,
+    TREE_PATH: currentNode.TREE_PATH,
+    rowNo: currentNode.rowNo,
+    treeId: currentNode.treeId,
+    SEVIYE: currentLevel,
+    children: rebaseReplacementChildren(
+      replacement.children ?? [],
+      currentNode.treeId,
+      currentLevel + 1,
+    ),
+  }
+}
+
+function rebaseReplacementChildren(nodes, parentTreeId, level) {
+  return nodes.map((node, index) => {
+    const treeId = [
+      parentTreeId,
+      'variant',
+      node.STOK_DETAY_NO ?? node.STOK_VARYANT_NO ?? index,
+      index,
+    ].join('-')
+
+    return {
+      ...node,
+      treeId,
+      SEVIYE: level,
+      children: rebaseReplacementChildren(
+        node.children ?? [],
+        treeId,
+        level + 1,
+      ),
+    }
+  })
+}
+
+function normalizeTreeLevel(value) {
+  const level = Number(value)
+  return Number.isFinite(level) && level >= 0 ? level : 0
+}
+
+function getNumericCost(value) {
+  const cost = Number(value)
+  return Number.isFinite(cost) ? cost : 0
+}
+
+function applyCostDelta(value, delta) {
+  const cost = Number(value)
+  return Number.isFinite(cost) ? cost + delta : value
 }

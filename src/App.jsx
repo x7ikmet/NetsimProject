@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { LoaderCircle, Search } from 'lucide-react'
 import './App.css'
 import { Button } from '@/components/ui/button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -21,11 +22,13 @@ import { getStockLabel, getVariantLabel } from './utils/formatters'
 import {
   buildProductTree,
   collectExpandableIds,
+  replaceTreeVariant,
 } from './utils/productTree'
 
 const initialLoadingState = {
   stocks: false,
   variants: false,
+  rowVariants: false,
   tree: false,
 }
 
@@ -34,6 +37,10 @@ function App() {
   const [variants, setVariants] = useState([])
   const [selectedStock, setSelectedStock] = useState(null)
   const [selectedVariant, setSelectedVariant] = useState(null)
+  const [rowVariants, setRowVariants] = useState([])
+  const [editingRow, setEditingRow] = useState(null)
+  const [rowVariantDialogOpen, setRowVariantDialogOpen] = useState(false)
+  const [updatingRowId, setUpdatingRowId] = useState('')
   const [tree, setTree] = useState([])
   const [expandedIds, setExpandedIds] = useState(new Set())
   const [stockDialogOpen, setStockDialogOpen] = useState(false)
@@ -84,6 +91,85 @@ function App() {
       setMessage(error.message)
     } finally {
       setLoadingField('variants', false)
+    }
+  }
+
+  async function openRowVariantDialog(row) {
+    setMessage('')
+
+    if (!row.STOK_NO) {
+      setMessage('Bu satır için stok numarası bulunamadı.')
+      return
+    }
+
+    setEditingRow(row)
+    setRowVariants([])
+    setRowVariantDialogOpen(true)
+    setLoadingField('rowVariants', true)
+
+    try {
+      setRowVariants(await getVaryantsByStokId(row.STOK_NO))
+    } catch (error) {
+      setMessage(error.message)
+    } finally {
+      setLoadingField('rowVariants', false)
+    }
+  }
+
+  function closeRowVariantDialog() {
+    setRowVariantDialogOpen(false)
+    setEditingRow(null)
+    setRowVariants([])
+  }
+
+  async function selectRowVariant(variant) {
+    const targetRow = editingRow
+    if (!targetRow) return
+
+    closeRowVariantDialog()
+
+    if (variant.STOK_VARYANT_NO === targetRow.STOK_VARYANT_NO) {
+      return
+    }
+
+    const rowQuantity = Number(targetRow.MIKTAR)
+    const rowUnit = String(targetRow.BIRIM ?? '').trim()
+
+    if (!Number.isFinite(rowQuantity) || rowQuantity <= 0 || !rowUnit) {
+      setMessage('Satırın miktar veya birim bilgisi maliyet hesabı için geçersiz.')
+      return
+    }
+
+    setMessage('')
+    setUpdatingRowId(targetRow.treeId)
+
+    try {
+      const [replacement] = await buildProductTree({
+        stokVaryantNo: variant.STOK_VARYANT_NO,
+        birim: rowUnit,
+        miktar: rowQuantity,
+      })
+
+      if (!replacement) {
+        throw new Error('Seçilen varyant için maliyet ağacı bulunamadı.')
+      }
+
+      setTree((current) => {
+        const result = replaceTreeVariant(
+          current,
+          targetRow.treeId,
+          replacement,
+        )
+        return result.replaced ? result.nodes : current
+      })
+
+      if (Number(targetRow.SEVIYE) === 0) {
+        setSelectedVariant(variant)
+      }
+    } catch (error) {
+      setMessage(error.message)
+    } finally {
+      setUpdatingRowId('')
     }
   }
 
@@ -172,130 +258,145 @@ function App() {
 
   return (
     <main className="erp-page">
-      <header className="page-header">
-        <div>
-          <h1>Ürün Ağacı</h1>
-        </div>
-      </header>
-
-      <form className="search-panel" onSubmit={findProductTree}>
-        <FieldGroup className="search-fields">
-          <SelectorField
-            className="search-stock"
-            id="stock-name"
-            label="Stok Adı"
-            value={getStockLabel(selectedStock)}
-            placeholder="Stok adı seçiniz"
-            onOpen={openStockDialog}
-          />
-
-          <SelectorField
-            className="search-variant"
-            id="stock-variant"
-            label="Stok Varyantı"
-            value={getVariantLabel(selectedVariant)}
-            placeholder="Stok varyantı seçiniz"
-            onOpen={openVariantDialog}
-            disabled={!selectedStock}
-          />
-
-          <Field className="search-unit">
-            <FieldLabel htmlFor="unit">Birim</FieldLabel>
-            <Input
-              id="unit"
-              value={unit}
-              onChange={(event) => {
-                setUnit(event.target.value)
-                clearTree()
-              }}
-              placeholder="Adet"
-            />
-          </Field>
-
-          <Field className="search-quantity">
-            <FieldLabel htmlFor="quantity">Miktar</FieldLabel>
-            <Input
-              id="quantity"
-              type="number"
-              min="0.01"
-              step="any"
-              value={quantity}
-              onChange={(event) => {
-                setQuantity(event.target.value)
-                clearTree()
-              }}
-              aria-invalid={quantity !== '' && Number(quantity) <= 0}
-            />
-          </Field>
-
-          <Field className="search-cost-method">
-            <FieldLabel htmlFor="cost-method">Maliyet Yöntemi</FieldLabel>
-            <Select
-              items={costMethods}
-              value={costMethod}
-              onValueChange={setCostMethod}
-            >
-              <SelectTrigger id="cost-method">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false}>
-                <SelectGroup>
-                  {costMethods.map((method) => (
-                    <SelectItem key={method.value} value={method.value}>
-                      {method.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </Field>
-
-          <div className="tree-actions" role="group" aria-label="Ağaç işlemleri">
-            <Button
-              type="button"
-              variant="outline"
-              size="default"
-              onClick={collapseTree}
-              disabled={!tree.length || loading.tree}
-            >
-              Daralt
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="default"
-              onClick={expandTree}
-              disabled={!tree.length || loading.tree}
-            >
-              Genişlet
-            </Button>
+      <div className="page-shell">
+        <header className="page-header">
+          <div>
+            <h1>Ürün Ağacı</h1>
           </div>
+        </header>
 
-          <Button className="search-action" type="submit" disabled={loading.tree}>
-            {loading.tree ? 'Bulunuyor...' : 'Bul'}
-          </Button>
-        </FieldGroup>
-      </form>
+        <form className="search-panel" onSubmit={findProductTree}>
+          <FieldGroup className="search-fields">
+            <SelectorField
+              className="search-stock"
+              id="stock-name"
+              label="Stok Adı"
+              value={getStockLabel(selectedStock)}
+              placeholder="Stok adı seçiniz"
+              onOpen={openStockDialog}
+            />
 
-      {message ? <div className="notice">{message}</div> : null}
+            <SelectorField
+              className="search-variant"
+              id="stock-variant"
+              label="Stok Varyantı"
+              value={getVariantLabel(selectedVariant)}
+              placeholder="Stok varyantı seçiniz"
+              onOpen={openVariantDialog}
+              disabled={!selectedStock}
+            />
 
-      <section className="result-panel">
-        <BomStudioTable
-          rows={tree}
-          expandedIds={expandedIds}
-          onToggle={toggleRow}
-          emptyText={
-            loading.tree
-              ? 'Ürün ağacı yükleniyor...'
-              : 'Stok ve varyant seçip Bul butonuna basınız.'
-          }
-        />
-      </section>
+            <Field className="search-unit">
+              <FieldLabel htmlFor="unit">Birim</FieldLabel>
+              <Input
+                id="unit"
+                value={unit}
+                onChange={(event) => {
+                  setUnit(event.target.value)
+                  clearTree()
+                }}
+                placeholder="Adet"
+              />
+            </Field>
+
+            <Field
+              className="search-quantity"
+              data-invalid={
+                quantity !== '' && Number(quantity) <= 0
+                  ? true
+                  : undefined
+              }
+            >
+              <FieldLabel htmlFor="quantity">Miktar</FieldLabel>
+              <Input
+                id="quantity"
+                type="number"
+                min="0.01"
+                step="any"
+                value={quantity}
+                onChange={(event) => {
+                  setQuantity(event.target.value)
+                  clearTree()
+                }}
+                aria-invalid={quantity !== '' && Number(quantity) <= 0}
+              />
+            </Field>
+
+            <Field className="search-cost-method">
+              <FieldLabel htmlFor="cost-method">Maliyet Yöntemi</FieldLabel>
+              <Select
+                items={costMethods}
+                value={costMethod}
+                onValueChange={setCostMethod}
+              >
+                <SelectTrigger id="cost-method">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent alignItemWithTrigger={false}>
+                  <SelectGroup>
+                    {costMethods.map((method) => (
+                      <SelectItem key={method.value} value={method.value}>
+                        {method.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <div className="tree-actions" role="group" aria-label="Ağaç işlemleri">
+              <Button
+                type="button"
+                variant="outline"
+                size="default"
+                onClick={collapseTree}
+                disabled={!tree.length || loading.tree}
+              >
+                Daralt
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="default"
+                onClick={expandTree}
+                disabled={!tree.length || loading.tree}
+              >
+                Genişlet
+              </Button>
+            </div>
+
+            <Button className="search-action" type="submit" disabled={loading.tree}>
+              {loading.tree ? (
+                <LoaderCircle className="loading-icon" data-icon="inline-start" />
+              ) : (
+                <Search data-icon="inline-start" />
+              )}
+              {loading.tree ? 'Bulunuyor...' : 'Ağacı göster'}
+            </Button>
+          </FieldGroup>
+        </form>
+
+        {message ? (
+          <div className="notice" role="status">
+            <span aria-hidden="true">!</span>
+            {message}
+          </div>
+        ) : null}
+
+        <section className="result-panel" aria-label="Ürün ağacı sonuçları">
+          <BomStudioTable
+            rows={tree}
+            expandedIds={expandedIds}
+            onToggle={toggleRow}
+            onVariantOpen={openRowVariantDialog}
+            updatingRowId={updatingRowId}
+          />
+        </section>
+      </div>
 
       {stockDialogOpen ? (
         <LookupDialog
           title="Stok Kart Seçimi"
-          description="ERP sisteminden gelen stok kartları içinden seçim yapın."
           open={stockDialogOpen}
           rows={stocks}
           columns={stockColumns}
@@ -309,7 +410,6 @@ function App() {
       {variantDialogOpen ? (
         <LookupDialog
           title="Stok Varyantı Seçimi"
-          description="Seçili stok kartına bağlı varyantlar."
           open={variantDialogOpen}
           rows={variants}
           columns={variantColumns}
@@ -317,6 +417,25 @@ function App() {
           selectedRow={selectedVariant}
           onClose={() => setVariantDialogOpen(false)}
           onSelect={selectVariant}
+        />
+      ) : null}
+
+      {rowVariantDialogOpen && editingRow ? (
+        <LookupDialog
+          title="Satır Varyantını Değiştir"
+          description={`Stok: ${editingRow.STOK_KODU ?? editingRow.STOK_NO}. Seçimden sonra bu satırın maliyeti yeniden hesaplanır.`}
+          open={rowVariantDialogOpen}
+          rows={rowVariants}
+          columns={variantColumns}
+          loading={loading.rowVariants}
+          selectedRow={
+            rowVariants.find(
+              (variant) =>
+                variant.STOK_VARYANT_NO === editingRow.STOK_VARYANT_NO,
+            ) ?? null
+          }
+          onClose={closeRowVariantDialog}
+          onSelect={selectRowVariant}
         />
       ) : null}
     </main>

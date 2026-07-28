@@ -1,3 +1,4 @@
+import { Ellipsis } from 'lucide-react'
 import { Field, FieldLabel } from '@/components/ui/field'
 import {
   InputGroup,
@@ -30,11 +31,11 @@ export function SelectorField({
           <InputGroupButton
             onClick={onOpen}
             disabled={disabled}
-            title={`${label} seç`}
-            aria-label={`${label} seç`}
-          >
-            ...
-          </InputGroupButton>
+          title={`${label} seç`}
+          aria-label={`${label} seç`}
+        >
+          <Ellipsis data-icon="inline-start" />
+        </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>
     </Field>

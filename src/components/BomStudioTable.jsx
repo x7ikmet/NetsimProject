@@ -1,14 +1,24 @@
 import { useMemo, useState } from 'react'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronRight,
+  Ellipsis,
+  LoaderCircle,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group'
 import {
   Table,
   TableBody,
@@ -19,7 +29,13 @@ import {
 } from '@/components/ui/table'
 import { formatValue } from '../utils/formatters'
 
-export function BomStudioTable({ rows, expandedIds, onToggle, emptyText }) {
+export function BomStudioTable({
+  rows,
+  expandedIds,
+  onToggle,
+  onVariantOpen,
+  updatingRowId,
+}) {
   const [selectedId, setSelectedId] = useState('')
 
   const visibleRows = useMemo(
@@ -32,7 +48,6 @@ export function BomStudioTable({ rows, expandedIds, onToggle, emptyText }) {
       <Card className="bom-empty-card" size="sm">
         <CardHeader>
           <CardTitle>Ürün ağacı görünümü</CardTitle>
-          <CardDescription>{emptyText}</CardDescription>
         </CardHeader>
       </Card>
     )
@@ -60,6 +75,7 @@ export function BomStudioTable({ rows, expandedIds, onToggle, emptyText }) {
                     <TableHead className="align-right">Birim Fiyat</TableHead>
                     <TableHead className="align-right">Tutar</TableHead>
                     <TableHead className="align-right">Ana Maliyet</TableHead>
+                    <TableHead>Döviz</TableHead>
                     <TableHead className="align-right">Seviye</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -71,6 +87,12 @@ export function BomStudioTable({ rows, expandedIds, onToggle, emptyText }) {
                         className="bom-tree-row"
                         data-depth={row.depth}
                         data-state={selectedId === row.treeId ? 'selected' : undefined}
+                        data-updating={
+                          updatingRowId === row.treeId ? true : undefined
+                        }
+                        aria-busy={
+                          updatingRowId === row.treeId ? true : undefined
+                        }
                         onClick={() => setSelectedId(row.treeId)}
                       >
                         <TableCell className="bom-line-cell">
@@ -141,7 +163,11 @@ export function BomStudioTable({ rows, expandedIds, onToggle, emptyText }) {
                         </TableCell>
                         <TableCell>
                           <div className="bom-variant-cell">
-                            <span>{formatValue(row.VARYANT_ADI)}</span>
+                            <RowVariantSelector
+                              row={row}
+                              loading={updatingRowId === row.treeId}
+                              onOpen={() => onVariantOpen(row)}
+                            />
                           </div>
                         </TableCell>
                         <TableCell className="align-right">
@@ -157,6 +183,7 @@ export function BomStudioTable({ rows, expandedIds, onToggle, emptyText }) {
                         <TableCell className="align-right">
                           {formatValue(row.ANA_MALIYET)}
                         </TableCell>
+                        <TableCell>{formatValue(row.DOVIZ_BIRIMI)}</TableCell>
                         <TableCell className="bom-level-cell align-right">
                           <span className="bom-level-badge">
                             {formatValue(row.level)}
@@ -166,7 +193,7 @@ export function BomStudioTable({ rows, expandedIds, onToggle, emptyText }) {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={11}>
+                      <TableCell colSpan={12}>
                         <div className="bom-no-results">BOM satırı bulunamadı.</div>
                       </TableCell>
                     </TableRow>
@@ -178,6 +205,50 @@ export function BomStudioTable({ rows, expandedIds, onToggle, emptyText }) {
         </Card>
       </div>
     </div>
+  )
+}
+
+function RowVariantSelector({ row, loading, onOpen }) {
+  const disabled = loading || !row.STOK_NO
+  const label = row.VARYANT_ADI
+    ? `${row.VARYANT_ADI} varyantını değiştir`
+    : 'Satır varyantı seç'
+
+  return (
+    <InputGroup
+      className="bom-variant-selector"
+      data-loading={loading || undefined}
+      onClick={(event) => event.stopPropagation()}
+    >
+      <InputGroupInput
+        value={row.VARYANT_ADI ?? ''}
+        placeholder="Varyant seç"
+        readOnly
+        disabled={disabled}
+        aria-label={label}
+        onClick={onOpen}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            onOpen()
+          }
+        }}
+      />
+      <InputGroupAddon>
+        <InputGroupButton
+          onClick={onOpen}
+          disabled={disabled}
+          title={label}
+          aria-label={label}
+        >
+          {loading ? (
+            <LoaderCircle className="loading-icon" data-icon="inline-start" />
+          ) : (
+            <Ellipsis data-icon="inline-start" />
+          )}
+        </InputGroupButton>
+      </InputGroupAddon>
+    </InputGroup>
   )
 }
 
