@@ -222,7 +222,7 @@ function RowVariantSelector({ row, loading, disabled, onOpen }) {
       onClick={(event) => event.stopPropagation()}
     >
       <InputGroupInput
-        value={row.VARYANT_ADI ?? ''}
+        value={row.VARYANT_ADI ?? '--- ---'}
         placeholder="Varyant seç"
         readOnly
         disabled={selectorDisabled}
