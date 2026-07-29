@@ -148,8 +148,10 @@ function App() {
     try {
       const [replacement] = await buildProductTree({
         stokVaryantNo: variant.STOK_VARYANT_NO,
+        stokNo: targetRow.STOK_NO,
         birim: rowUnit,
         miktar: rowQuantity,
+        maliyetYontemi: costMethod,
       })
 
       if (!replacement) {
@@ -216,8 +218,10 @@ function App() {
     try {
       const nodes = await buildProductTree({
         stokVaryantNo: selectedVariant.STOK_VARYANT_NO,
+        stokNo: selectedStock.STOK_NO,
         birim: unit.trim(),
         miktar: parsedQuantity,
+        maliyetYontemi: costMethod,
       })
 
       setTree(nodes)

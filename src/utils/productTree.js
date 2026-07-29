@@ -1,9 +1,21 @@
-import { getProductTreeV2 } from '../api/stokApi'
+import { getProductTreeV3 } from '../api/stokApi'
 
-export async function buildProductTree({ stokVaryantNo, birim, miktar }) {
+export async function buildProductTree({
+  stokVaryantNo,
+  stokNo,
+  birim,
+  miktar,
+  maliyetYontemi,
+}) {
   if (!stokVaryantNo) return []
 
-  const rows = await getProductTreeV2({ stokVaryantNo, birim, miktar })
+  const rows = await getProductTreeV3({
+    stokVaryantNo,
+    stokNo,
+    birim,
+    miktar,
+    maliyetYontemi,
+  })
   if (!rows.length) return []
 
   const normalizeLevel = (value) => {

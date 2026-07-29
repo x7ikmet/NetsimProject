@@ -74,14 +74,22 @@ export function getProductTree(stokVaryantNo) {
   })
 }
 
-export function getProductTreeV2({ stokVaryantNo, birim, miktar }) {
-  return requestJson('/FastAPI/Stok/UrunAgaciV2', {
+export function getProductTreeV3({
+  stokVaryantNo,
+  stokNo,
+  birim,
+  miktar,
+  maliyetYontemi,
+}) {
+  return requestJson('/FastAPI/Stok/UrunAgaciV3', {
     method: 'POST',
     cache: 'no-store',
     body: JSON.stringify({
-      STOK_VARYANT_NO: stokVaryantNo,
-      BIRIM: birim,
       MIKTAR: miktar,
+      BIRIM: birim,
+      STOK_VARYANT_NO: stokVaryantNo,
+      STOK_NO: stokNo,
+      MALIYET_YONTEMI: maliyetYontemi,
     }),
   })
 }
