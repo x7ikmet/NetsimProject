@@ -10,6 +10,7 @@ const vite = await createServer({
 const {
   appendTreeChild,
   buildProductTree,
+  getTreeTotalCost,
   removeExtraTreeNode,
   replaceTreeVariant,
 } = await vite.ssrLoadModule('/src/utils/productTree.js')
@@ -69,14 +70,39 @@ test('extra children update ancestor costs and can be removed', () => {
       ],
     },
   ]
-  const extra = {
+  const variantTree = {
+    STOK_KODU: 'EXTRA-1',
     STOK_VARYANT_NO: 3,
-    ANA_MALIYET: 12,
+    MIKTAR: 2,
+    ANA_MALIYET: 999,
     DOVIZ_BIRIMI: 'TL',
-    children: [{ STOK_VARYANT_NO: 4, ANA_MALIYET: 12, children: [] }],
+    children: [
+      { STOK_KODU: 'CHILD-1', ANA_MALIYET: 5, children: [] },
+      { STOK_KODU: 'CHILD-2', ANA_MALIYET: 7, children: [] },
+    ],
+  }
+  const calculatedTotal = getTreeTotalCost(variantTree)
+  const extra = {
+    ...variantTree,
+    BIRIM_FIYAT: calculatedTotal / variantTree.MIKTAR,
+    TUTAR: calculatedTotal,
+    ANA_MALIYET: calculatedTotal,
   }
 
-  const added = appendTreeChild(tree, 'parent', extra)
+  assert.equal(calculatedTotal, 12)
+  assert.equal(getTreeTotalCost({ ANA_MALIYET: 12, children: [] }), 12)
+
+  const originalCrypto = Object.getOwnPropertyDescriptor(globalThis, 'crypto')
+  Object.defineProperty(globalThis, 'crypto', {
+    configurable: true,
+    value: {},
+  })
+  let added
+  try {
+    added = appendTreeChild(tree, 'parent', extra)
+  } finally {
+    Object.defineProperty(globalThis, 'crypto', originalCrypto)
+  }
   const addedRoot = added.nodes[0]
   const addedParent = addedRoot.children[0]
   const addedChild = addedParent.children[0]
@@ -85,11 +111,31 @@ test('extra children update ancestor costs and can be removed', () => {
   assert.equal(addedRoot.ANA_MALIYET, 112)
   assert.equal(addedParent.ANA_MALIYET, 52)
   assert.equal(addedChild.SEVIYE, 2)
+  assert.equal(addedChild.STOK_VARYANT_NO, 3)
+  assert.equal(addedChild.BIRIM_FIYAT, 6)
+  assert.equal(addedChild.TUTAR, 12)
+  assert.equal(addedChild.children.length, 2)
   assert.equal(addedChild.children[0].SEVIYE, 3)
   assert.equal(addedChild.isExtra, true)
   assert.equal(addedChild.treeId, added.childId)
 
-  const removed = removeExtraTreeNode(added.nodes, added.childId)
+  const edited = replaceTreeVariant(added.nodes, added.childId, {
+    ...extra,
+    BIRIM_FIYAT: 8,
+    TUTAR: 16,
+    ANA_MALIYET: 16,
+    children: [
+      { STOK_KODU: 'CHILD-1', ANA_MALIYET: 6, children: [] },
+      { STOK_KODU: 'CHILD-2', ANA_MALIYET: 10, children: [] },
+    ],
+  })
+  assert.equal(edited.replaced, true)
+  assert.equal(edited.nodes[0].ANA_MALIYET, 116)
+  assert.equal(edited.nodes[0].children[0].ANA_MALIYET, 56)
+  assert.equal(edited.nodes[0].children[0].children[0].BIRIM_FIYAT, 8)
+  assert.equal(edited.nodes[0].children[0].children[0].isExtra, true)
+
+  const removed = removeExtraTreeNode(edited.nodes, added.childId)
   assert.equal(removed.removed, true)
   assert.equal(removed.nodes[0].ANA_MALIYET, 100)
   assert.equal(removed.nodes[0].children[0].ANA_MALIYET, 40)

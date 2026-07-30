@@ -57,6 +57,15 @@ export function collectExpandableIds(nodes) {
   })
 }
 
+export function getTreeTotalCost(node) {
+  const costRows = node.children?.length ? node.children : [node]
+
+  return costRows.reduce((total, row) => {
+    const cost = Number(row.ANA_MALIYET)
+    return Number.isFinite(cost) ? total + cost : Number.NaN
+  }, 0)
+}
+
 export function replaceTreeVariant(nodes, treeId, replacement) {
   let replaced = false
   let costDelta = 0
@@ -100,7 +109,10 @@ export function appendTreeChild(nodes, parentTreeId, child) {
 
   const nextNodes = nodes.map((node) => {
     if (node.treeId === parentTreeId) {
-      childId = `${parentTreeId}-extra-${globalThis.crypto.randomUUID()}`
+      const uniqueId =
+        globalThis.crypto?.randomUUID?.() ??
+        `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
+      childId = `${parentTreeId}-extra-${uniqueId}`
       const nextChild = {
         ...rebaseReplacementTree(
           {

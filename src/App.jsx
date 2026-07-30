@@ -23,6 +23,7 @@ import {
   appendTreeChild,
   buildProductTree,
   collectExpandableIds,
+  getTreeTotalCost,
   removeExtraTreeNode,
   replaceTreeVariant,
 } from './utils/productTree'
@@ -194,6 +195,21 @@ function App() {
       variant: null,
       quantity: '1',
       unit: '',
+      price: '',
+    })
+  }
+
+  function editExtraRow(row, parent) {
+    setMessage('')
+    setExtraVariants([])
+    setExtraDraft({
+      parent,
+      editingTreeId: row.treeId,
+      stock: row,
+      variant: row.STOK_VARYANT_NO ? row : null,
+      quantity: String(row.MIKTAR ?? '1'),
+      unit: row.BIRIM ?? 'Adet',
+      price: String(row.BIRIM_FIYAT ?? ''),
     })
   }
 
@@ -216,6 +232,7 @@ function App() {
       variant: null,
       quantity: String(stock.MIKTAR ?? '1'),
       unit: stock.BIRIM1 ?? 'Adet',
+      price: '',
     }))
     setExtraVariants([])
     setExtraDialog('')
@@ -246,13 +263,14 @@ function App() {
       variant,
       quantity: String(variant.MIKTAR ?? current.quantity),
       unit: variant.BIRIM ?? current.stock.BIRIM1 ?? 'Adet',
+      price: '',
     }))
     setExtraDialog('')
   }
 
   async function addExtraRow() {
-    if (!extraDraft?.stock || !extraDraft.variant) {
-      setMessage('Ek bileşen için stok kartı ve varyant seçiniz.')
+    if (!extraDraft?.stock) {
+      setMessage('Ek bileşen için stok kartı seçiniz.')
       return
     }
 
@@ -268,43 +286,91 @@ function App() {
     }
 
     setMessage('')
-    setLoadingField('extraTree', true)
+    let child
 
-    try {
-      const [child] = await buildProductTree({
-        stokVaryantNo: extraDraft.variant.STOK_VARYANT_NO,
-        stokNo: extraDraft.stock.STOK_NO,
-        birim: extraDraft.unit,
-        miktar: parsedQuantity,
-        maliyetYontemi: treeCostMethod || costMethod,
-      })
+    if (extraDraft.variant) {
+      setLoadingField('extraTree', true)
+      try {
+        const [variantTree] = await buildProductTree({
+          stokVaryantNo: extraDraft.variant.STOK_VARYANT_NO,
+          stokNo: extraDraft.stock.STOK_NO,
+          birim: extraDraft.unit,
+          miktar: parsedQuantity,
+          maliyetYontemi: treeCostMethod || costMethod,
+        })
+        const total = variantTree ? getTreeTotalCost(variantTree) : Number.NaN
 
-      if (!child || !Number.isFinite(Number(child.ANA_MALIYET))) {
-        throw new Error('Ek bileşen için geçerli maliyet bulunamadı.')
+        if (!variantTree || !Number.isFinite(total)) {
+          throw new Error('Seçilen varyant için geçerli maliyet ağacı bulunamadı.')
+        }
+
+        child = {
+          ...variantTree,
+          STOK_NO: extraDraft.stock.STOK_NO,
+          STOK_KODU: extraDraft.stock.STOK_KODU,
+          STOK_ADI: extraDraft.stock.STOK_ADI,
+          STOK_TIP_ADI: extraDraft.stock.STOK_TIP_ADI,
+          STOK_VARYANT_NO: extraDraft.variant.STOK_VARYANT_NO,
+          VARYANT_KODU: extraDraft.variant.VARYANT_KODU,
+          VARYANT_ADI: extraDraft.variant.VARYANT_ADI,
+          MIKTAR: parsedQuantity,
+          BIRIM: extraDraft.unit,
+          BIRIM_FIYAT: total / parsedQuantity,
+          TUTAR: total,
+          ANA_MALIYET: total,
+        }
+      } catch (error) {
+        setMessage(error.message)
+        return
+      } finally {
+        setLoadingField('extraTree', false)
+      }
+    } else {
+      const parsedPrice = Number(extraDraft.price)
+      if (
+        extraDraft.price === '' ||
+        !Number.isFinite(parsedPrice) ||
+        parsedPrice < 0
+      ) {
+        setMessage('Ek bileşen birim fiyatı sıfır veya daha büyük olmalıdır.')
+        return
       }
 
-      const treeCurrency = String(tree[0]?.DOVIZ_BIRIMI ?? '').trim()
-      const childCurrency = String(child.DOVIZ_BIRIMI ?? '').trim()
-      if (treeCurrency && childCurrency && treeCurrency !== childCurrency) {
-        throw new Error('Farklı döviz birimindeki maliyetler birleştirilemez.')
+      const total = parsedQuantity * parsedPrice
+      child = {
+        STOK_NO: extraDraft.stock.STOK_NO,
+        STOK_KODU: extraDraft.stock.STOK_KODU,
+        STOK_ADI: extraDraft.stock.STOK_ADI,
+        STOK_TIP_ADI: extraDraft.stock.STOK_TIP_ADI,
+        MIKTAR: parsedQuantity,
+        BIRIM: extraDraft.unit,
+        BIRIM_FIYAT: parsedPrice,
+        TUTAR: total,
+        ANA_MALIYET: total,
+        DOVIZ_BIRIMI:
+          tree[0]?.DOVIZ_BIRIMI ?? extraDraft.parent.DOVIZ_BIRIMI,
+        children: [],
       }
-
-      const result = appendTreeChild(
-        tree,
-        extraDraft.parent.treeId,
-        child,
-      )
-      if (!result.appended) {
-        throw new Error('Ek bileşenin ekleneceği üst satır bulunamadı.')
-      }
-
-      setTree(result.nodes)
-      cancelExtraRow()
-    } catch (error) {
-      setMessage(error.message)
-    } finally {
-      setLoadingField('extraTree', false)
     }
+
+    const treeCurrency = String(tree[0]?.DOVIZ_BIRIMI ?? '').trim()
+    const childCurrency = String(child.DOVIZ_BIRIMI ?? '').trim()
+    if (treeCurrency && childCurrency && treeCurrency !== childCurrency) {
+      setMessage('Farklı döviz birimindeki maliyetler birleştirilemez.')
+      return
+    }
+
+    const result = extraDraft.editingTreeId
+      ? replaceTreeVariant(tree, extraDraft.editingTreeId, child)
+      : appendTreeChild(tree, extraDraft.parent.treeId, child)
+
+    if (!(result.appended || result.replaced)) {
+      setMessage('Ek bileşen satırı güncellenemedi.')
+      return
+    }
+
+    setTree(result.nodes)
+    cancelExtraRow()
   }
 
   function removeExtraRow(treeId) {
@@ -463,8 +529,8 @@ function App() {
                 min="0.01"
                 step="any"
                 value={quantity}
+                onChange={(event) => setQuantity(event.target.value)}
                 aria-invalid={quantity !== '' && Number(quantity) <= 0}
-                readOnly
               />
             </Field>
 
@@ -558,7 +624,11 @@ function App() {
             onExtraQuantityChange={(value) =>
               setExtraDraft((current) => ({ ...current, quantity: value }))
             }
+            onExtraPriceChange={(value) =>
+              setExtraDraft((current) => ({ ...current, price: value }))
+            }
             onExtraSubmit={addExtraRow}
+            onExtraEdit={editExtraRow}
             onExtraRemove={removeExtraRow}
           />
         </section>

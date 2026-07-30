@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Ellipsis,
   LoaderCircle,
+  Pencil,
   Plus,
   Trash2,
   X,
@@ -48,14 +49,17 @@ export function BomStudioTable({
   onExtraStockOpen,
   onExtraVariantOpen,
   onExtraQuantityChange,
+  onExtraPriceChange,
   onExtraSubmit,
+  onExtraEdit,
   onExtraRemove,
 }) {
   const [selectedId, setSelectedId] = useState('')
+  const extraParentId = extraDraft?.parent.treeId
 
   const visibleRows = useMemo(
-    () => numberRows(flattenTree(rows, expandedIds)),
-    [expandedIds, rows],
+    () => numberRows(flattenTree(rows, expandedIds, extraParentId)),
+    [expandedIds, extraParentId, rows],
   )
   const totalCost = rows.reduce(
     (total, row) => total + (Number(row.ANA_MALIYET) || 0),
@@ -103,6 +107,9 @@ export function BomStudioTable({
                     <TableHead className="align-right">Ana Maliyet</TableHead>
                     <TableHead>Döviz</TableHead>
                     <TableHead className="align-right">Seviye</TableHead>
+                    <TableHead className="bom-action-cell align-right">
+                      İşlem
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -117,17 +124,11 @@ export function BomStudioTable({
                             : null
                         }
                         loading={extraLoading}
-                        disabled={Boolean(
-                          updatingRowId ||
-                            extraLoading ||
-                            (extraDraft &&
-                              extraDraft.parent.treeId !== row.parent.treeId),
-                        )}
-                        onStart={() => onExtraStart(row.parent)}
                         onCancel={onExtraCancel}
                         onStockOpen={onExtraStockOpen}
                         onVariantOpen={onExtraVariantOpen}
                         onQuantityChange={onExtraQuantityChange}
+                        onPriceChange={onExtraPriceChange}
                         onSubmit={onExtraSubmit}
                       />
                     ) : (
@@ -144,6 +145,8 @@ export function BomStudioTable({
                         onToggle={() => onToggle(row.treeId)}
                         onVariantOpen={() => onVariantOpen(row)}
                         onRemove={() => onExtraRemove(row.treeId)}
+                        onEdit={() => onExtraEdit(row, row.treeParent)}
+                        onExtraStart={() => onExtraStart(row.addParent)}
                       />
                     ),
                   )}
@@ -167,6 +170,8 @@ function TreeDataRow({
   onToggle,
   onVariantOpen,
   onRemove,
+  onEdit,
+  onExtraStart,
 }) {
   return (
     <TableRow
@@ -179,8 +184,32 @@ function TreeDataRow({
       onClick={onSelect}
     >
       <TableCell className="bom-line-cell">
-        <div className="bom-line-control" style={{ '--depth': row.depth }}>
+        <div
+          className="bom-line-control"
+          data-has-add={row.addParent || undefined}
+          style={{
+            '--depth': row.depth,
+            '--add-depth': Math.max(row.depth - 1, 0),
+          }}
+        >
           <TreeGuides row={row} />
+          {row.addParent ? (
+            <Button
+              className="bom-inline-add"
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              onClick={(event) => {
+                event.stopPropagation()
+                onExtraStart()
+              }}
+              disabled={disabled}
+              aria-label={`${formatValue(row.addParent.STOK_ADI)} altına ek bileşen ekle`}
+              title="Ek bileşen ekle"
+            >
+              <Plus />
+            </Button>
+          ) : null}
           {row.hasChildren ? (
             <Button
               type="button"
@@ -211,11 +240,7 @@ function TreeDataRow({
         <div className="bom-stock-cell">
           <div>
             <strong>{formatValue(row.STOK_ADI)}</strong>
-            <span>
-              {row.isExtra
-                ? 'EK BİLEŞEN'
-                : formatValue(row.STOK_TIP_ADI ?? row.STOK_NO)}
-            </span>
+            <span>{formatValue(row.STOK_TIP_ADI ?? row.STOK_NO)}</span>
           </div>
         </div>
       </TableCell>
@@ -241,23 +266,41 @@ function TreeDataRow({
       </TableCell>
       <TableCell>{formatValue(row.DOVIZ_BIRIMI)}</TableCell>
       <TableCell className="bom-level-cell align-right">
-        <div className="bom-level-actions">
-          <span className="bom-level-badge">{formatValue(row.level)}</span>
+        <span className="bom-level-badge">{formatValue(row.level)}</span>
+      </TableCell>
+      <TableCell className="bom-action-cell">
+        <div className="bom-row-actions">
           {row.isExtra ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onClick={(event) => {
-                event.stopPropagation()
-                onRemove()
-              }}
-              disabled={disabled}
-              aria-label={`${formatValue(row.STOK_ADI)} ek bileşenini kaldır`}
-              title="Ek bileşeni kaldır"
-            >
-              <Trash2 />
-            </Button>
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onEdit()
+                }}
+                disabled={disabled}
+                aria-label={`${formatValue(row.STOK_ADI)} ek bileşenini düzenle`}
+                title="Ek bileşeni düzenle"
+              >
+                <Pencil />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onRemove()
+                }}
+                disabled={disabled}
+                aria-label={`${formatValue(row.STOK_ADI)} ek bileşenini kaldır`}
+                title="Ek bileşeni kaldır"
+              >
+                <Trash2 />
+              </Button>
+            </>
           ) : null}
         </div>
       </TableCell>
@@ -269,51 +312,35 @@ function ExtraAddRow({
   row,
   draft,
   loading,
-  disabled,
-  onStart,
   onCancel,
   onStockOpen,
   onVariantOpen,
   onQuantityChange,
+  onPriceChange,
   onSubmit,
 }) {
-  if (!draft) {
-    return (
-      <TableRow className="bom-add-row" data-depth={row.depth}>
-        <TableCell className="bom-line-cell">
-          <div className="bom-line-control" style={{ '--depth': row.depth }}>
-            <TreeGuides row={row} />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onClick={onStart}
-              disabled={disabled}
-              aria-label={`${formatValue(row.parent.STOK_ADI)} altına ek bileşen ekle`}
-            >
-              <Plus />
-            </Button>
-          </div>
-        </TableCell>
-        <TableCell colSpan={11}>
-          <Button
-            className="bom-add-trigger"
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onStart}
-            disabled={disabled}
-          >
-            <Plus data-icon="inline-start" />
-            Ek bileşen ekle
-          </Button>
-        </TableCell>
-      </TableRow>
-    )
-  }
-
   const invalidQuantity =
     draft.quantity !== '' && Number(draft.quantity) <= 0
+  const invalidPrice =
+    !draft.variant &&
+    draft.price !== '' &&
+    (!Number.isFinite(Number(draft.price)) || Number(draft.price) < 0)
+  const total =
+    !draft.variant &&
+    !invalidQuantity &&
+    !invalidPrice &&
+    draft.quantity !== '' &&
+    draft.price !== ''
+      ? Number(draft.quantity) * Number(draft.price)
+      : null
+  const submitLabel = loading
+    ? 'Maliyet hesaplanıyor'
+    : draft.editingTreeId
+      ? 'Değişiklikleri kaydet'
+      : 'Ek bileşeni ekle'
+  const cancelLabel = draft.editingTreeId
+    ? 'Düzenlemeyi iptal et'
+    : 'Ek bileşen eklemeyi iptal et'
 
   return (
     <TableRow
@@ -347,8 +374,8 @@ function ExtraAddRow({
       <TableCell>
         <InlineLookup
           value={draft.variant?.VARYANT_ADI}
-          placeholder="Varyant seç"
-          label="Ek stok varyantı seç"
+          placeholder="Varyant seç (opsiyonel)"
+          label="Ek stok varyantı seç (opsiyonel)"
           onOpen={onVariantOpen}
           disabled={loading || !draft.stock}
         />
@@ -368,19 +395,36 @@ function ExtraAddRow({
         />
       </TableCell>
       <TableCell>{formatValue(draft.unit)}</TableCell>
-      <TableCell className="align-right">---</TableCell>
-      <TableCell className="align-right">---</TableCell>
-      <TableCell className="align-right">---</TableCell>
-      <TableCell>---</TableCell>
-      <TableCell className="bom-level-cell">
+      <TableCell>
+        <Input
+          className="bom-extra-price"
+          type="number"
+          min="0"
+          step="any"
+          value={draft.price}
+          placeholder={draft.variant ? 'Otomatik' : undefined}
+          onChange={(event) => onPriceChange(event.target.value)}
+          onClick={(event) => event.stopPropagation()}
+          disabled={loading || Boolean(draft.variant)}
+          aria-label="Ek bileşen birim fiyatı"
+          aria-invalid={invalidPrice}
+        />
+      </TableCell>
+      <TableCell className="align-right">{formatValue(total)}</TableCell>
+      <TableCell className="align-right">{formatValue(total)}</TableCell>
+      <TableCell>{formatValue(row.parent.DOVIZ_BIRIMI)}</TableCell>
+      <TableCell className="bom-level-cell align-right">
+        <span className="bom-level-badge">{formatValue(row.depth)}</span>
+      </TableCell>
+      <TableCell className="bom-action-cell">
         <div className="bom-extra-actions">
           <Button
             type="button"
             size="icon-xs"
             onClick={onSubmit}
             disabled={loading}
-            aria-label="Ek bileşeni hesapla ve ekle"
-            title="Hesapla ve ekle"
+            aria-label={submitLabel}
+            title={submitLabel}
           >
             {loading ? <LoaderCircle className="loading-icon" /> : <Check />}
           </Button>
@@ -390,7 +434,7 @@ function ExtraAddRow({
             size="icon-xs"
             onClick={onCancel}
             disabled={loading}
-            aria-label="Ek bileşen eklemeyi iptal et"
+            aria-label={cancelLabel}
             title="Vazgeç"
           >
             <X />
@@ -504,9 +548,11 @@ function numberRows(rows) {
 function flattenTree(
   nodes,
   expandedIds,
+  activeExtraParentId,
   depth = 0,
   ancestorBranches = [],
   trailingSibling = false,
+  parent = null,
 ) {
   return nodes.flatMap((node, index) => {
     const children = node.children ?? []
@@ -526,6 +572,13 @@ function flattenTree(
       hasChildren: children.length > 0,
       expanded,
       branchColumns,
+      addParent:
+        parent &&
+        index === nodes.length - 1 &&
+        activeExtraParentId !== parent.treeId
+          ? parent
+          : null,
+      treeParent: parent,
     }
 
     if (!children.length || !expanded) return [row]
@@ -537,19 +590,31 @@ function flattenTree(
 
     return [
       row,
-      ...flattenTree(children, expandedIds, depth + 1, childBranches, true),
-      {
-        treeId: `${node.treeId}-add`,
-        isAddRow: true,
-        parent: node,
-        depth: depth + 1,
-        branchColumns: [...childBranches, false].map(
-          (continues, branchIndex, branches) => ({
-            continues,
-            current: branchIndex === branches.length - 1,
-          }),
-        ),
-      },
+      ...flattenTree(
+        children,
+        expandedIds,
+        activeExtraParentId,
+        depth + 1,
+        childBranches,
+        activeExtraParentId === node.treeId,
+        node,
+      ),
+      ...(activeExtraParentId === node.treeId
+        ? [
+            {
+              treeId: `${node.treeId}-add`,
+              isAddRow: true,
+              parent: node,
+              depth: depth + 1,
+              branchColumns: [...childBranches, false].map(
+                (continues, branchIndex, branches) => ({
+                  continues,
+                  current: branchIndex === branches.length - 1,
+                }),
+              ),
+            },
+          ]
+        : []),
     ]
   })
 }
