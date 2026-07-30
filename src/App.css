@@ -531,13 +531,6 @@ button:disabled {
   background: #fff8f4;
 }
 
-.bom-no-results {
-  display: grid;
-  min-height: 180px;
-  place-items: center;
-  color: var(--hs-ink-muted);
-}
-
 .modal-backdrop {
   position: fixed;
   z-index: 10;

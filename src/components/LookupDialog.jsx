@@ -10,7 +10,6 @@ export function LookupDialog({
   description,
   rows,
   columns,
-  open,
   loading,
   selectedRow,
   onClose,
@@ -27,17 +26,13 @@ export function LookupDialog({
   )
 
   useEffect(() => {
-    if (!open) return undefined
-
     function handleKeyDown(event) {
       if (event.key === 'Escape') onClose()
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose, open])
-
-  if (!open) return null
+  }, [onClose])
 
   return (
     <div

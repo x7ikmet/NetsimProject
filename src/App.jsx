@@ -403,7 +403,6 @@ function App() {
       {stockDialogOpen ? (
         <LookupDialog
           title="Stok Kart Seçimi"
-          open={stockDialogOpen}
           rows={stocks}
           columns={stockColumns}
           loading={loading.stocks}
@@ -416,7 +415,6 @@ function App() {
       {variantDialogOpen ? (
         <LookupDialog
           title="Stok Varyantı Seçimi"
-          open={variantDialogOpen}
           rows={variants}
           columns={variantColumns}
           loading={loading.variants}
@@ -430,7 +428,6 @@ function App() {
         <LookupDialog
           title="Satır Varyantını Değiştir"
           description={`Stok: ${editingRow.STOK_KODU ?? editingRow.STOK_NO}. Seçimden sonra bu satırın maliyeti yeniden hesaplanır.`}
-          open={rowVariantDialogOpen}
           rows={rowVariants}
           columns={variantColumns}
           loading={loading.rowVariants}

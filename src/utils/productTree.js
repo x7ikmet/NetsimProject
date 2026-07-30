@@ -32,8 +32,6 @@ export async function buildProductTree({
     const node = {
       ...row,
       STOK_ADI: row.STOK_ADI ?? row.KART_STOK_ADI,
-      ACIKLAMA: row.ACIKLAMA ?? row.VARYANT_ADI,
-      rowNo: siblings.length + 1,
       treeId: [
         'tree',
         row.TREE_PATH ?? '',
@@ -111,9 +109,7 @@ function rebaseReplacementTree(currentNode, replacement) {
     ...replacement,
     STOK_DETAY_NO: currentNode.STOK_DETAY_NO,
     ANA_STOK_VARYANT_NO: currentNode.ANA_STOK_VARYANT_NO,
-    ACIKLAMA: currentNode.ACIKLAMA,
     TREE_PATH: currentNode.TREE_PATH,
-    rowNo: currentNode.rowNo,
     treeId: currentNode.treeId,
     SEVIYE: currentLevel,
     children: rebaseReplacementChildren(

@@ -80,8 +80,7 @@ export function BomStudioTable({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {visibleRows.length ? (
-                    visibleRows.map((row, rowIndex) => (
+                  {visibleRows.map((row, rowIndex) => (
                       <TableRow
                         key={row.treeId}
                         className="bom-tree-row"
@@ -191,14 +190,7 @@ export function BomStudioTable({
                           </span>
                         </TableCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={12}>
-                        <div className="bom-no-results">BOM satırı bulunamadı.</div>
-                      </TableCell>
-                    </TableRow>
-                  )}
+                    ))}
                 </TableBody>
               </Table>
             </ScrollArea>
