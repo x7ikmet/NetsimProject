@@ -93,6 +93,99 @@ export function replaceTreeVariant(nodes, treeId, replacement) {
   return { nodes: nextNodes, replaced, costDelta }
 }
 
+export function appendTreeChild(nodes, parentTreeId, child) {
+  let appended = false
+  let childId = ''
+  const costDelta = getNumericCost(child.ANA_MALIYET)
+
+  const nextNodes = nodes.map((node) => {
+    if (node.treeId === parentTreeId) {
+      childId = `${parentTreeId}-extra-${globalThis.crypto.randomUUID()}`
+      const nextChild = {
+        ...rebaseReplacementTree(
+          {
+            STOK_DETAY_NO: null,
+            ANA_STOK_VARYANT_NO: node.STOK_VARYANT_NO,
+            TREE_PATH: `${node.TREE_PATH ?? ''}extra/`,
+            treeId: childId,
+            SEVIYE: normalizeTreeLevel(node.SEVIYE) + 1,
+          },
+          child,
+        ),
+        isExtra: true,
+      }
+      const children = [...(node.children ?? []), nextChild]
+      appended = true
+
+      return {
+        ...node,
+        ANA_MALIYET: applyCostDelta(node.ANA_MALIYET, costDelta),
+        DOVIZ_BIRIMI: getInheritedCurrency(children, node.DOVIZ_BIRIMI),
+        children,
+      }
+    }
+
+    if (!node.children?.length) return node
+
+    const childResult = appendTreeChild(node.children, parentTreeId, child)
+    if (!childResult.appended) return node
+
+    appended = true
+    childId = childResult.childId
+
+    return {
+      ...node,
+      ANA_MALIYET: applyCostDelta(node.ANA_MALIYET, costDelta),
+      DOVIZ_BIRIMI: getInheritedCurrency(
+        childResult.nodes,
+        node.DOVIZ_BIRIMI,
+      ),
+      children: childResult.nodes,
+    }
+  })
+
+  return { nodes: nextNodes, appended, childId, costDelta }
+}
+
+export function removeExtraTreeNode(nodes, treeId) {
+  let removed = false
+  let costDelta = 0
+  const nextNodes = []
+
+  nodes.forEach((node) => {
+    if (node.treeId === treeId && node.isExtra) {
+      removed = true
+      costDelta = -getNumericCost(node.ANA_MALIYET)
+      return
+    }
+
+    if (!node.children?.length) {
+      nextNodes.push(node)
+      return
+    }
+
+    const childResult = removeExtraTreeNode(node.children, treeId)
+    if (!childResult.removed) {
+      nextNodes.push(node)
+      return
+    }
+
+    removed = true
+    costDelta = childResult.costDelta
+    nextNodes.push({
+      ...node,
+      ANA_MALIYET: applyCostDelta(node.ANA_MALIYET, costDelta),
+      DOVIZ_BIRIMI: getInheritedCurrency(
+        childResult.nodes,
+        node.DOVIZ_BIRIMI,
+      ),
+      children: childResult.nodes,
+    })
+  })
+
+  return { nodes: nextNodes, removed, costDelta }
+}
+
 function prioritizeParents(nodes) {
   return nodes
     .map(({ children, ...node }) => {
@@ -119,6 +212,7 @@ function rebaseReplacementTree(currentNode, replacement) {
 
   return {
     ...replacement,
+    isExtra: currentNode.isExtra,
     STOK_DETAY_NO: currentNode.STOK_DETAY_NO,
     ANA_STOK_VARYANT_NO: currentNode.ANA_STOK_VARYANT_NO,
     TREE_PATH: currentNode.TREE_PATH,
