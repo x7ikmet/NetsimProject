@@ -256,12 +256,24 @@ button:disabled {
 .bom-table-card > [data-slot="card-header"] {
   min-height: 58px;
   align-content: center;
-  justify-content: start;
-  justify-items: start;
   border-bottom: 1px solid var(--hs-border-soft);
   padding: 12px 24px;
   text-align: left;
   background: #fffefa;
+}
+
+.bom-total-cost {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--hs-ink-muted);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.bom-total-cost output {
+  color: var(--hs-navy);
+  font-weight: 750;
 }
 
 .bom-table-content {

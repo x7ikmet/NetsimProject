@@ -47,7 +47,7 @@ function App() {
   const [variantDialogOpen, setVariantDialogOpen] = useState(false)
   const [loading, setLoading] = useState(initialLoadingState)
   const [message, setMessage] = useState('')
-  const [unit, setUnit] = useState('Adet')
+  const [unit, setUnit] = useState('')
   const [quantity, setQuantity] = useState('1')
   const [costMethod, setCostMethod] = useState(costMethods[0].value)
 
@@ -182,6 +182,7 @@ function App() {
     setSelectedVariant(null)
     setVariants([])
     setUnit(stock.BIRIM1 ?? 'Adet')
+    setQuantity(String(stock.MIKTAR ?? '1'))
     clearTree()
     setStockDialogOpen(false)
   }
@@ -189,6 +190,7 @@ function App() {
   function selectVariant(variant) {
     setSelectedVariant(variant)
     setUnit(variant.BIRIM ?? selectedStock?.BIRIM1 ?? 'Adet')
+    setQuantity(String(variant.MIKTAR ?? selectedStock?.MIKTAR ?? '1'))
     clearTree()
     setVariantDialogOpen(false)
   }
@@ -297,11 +299,8 @@ function App() {
               <Input
                 id="unit"
                 value={unit}
-                onChange={(event) => {
-                  setUnit(event.target.value)
-                  clearTree()
-                }}
                 placeholder="Adet"
+                readOnly
               />
             </Field>
 
@@ -320,11 +319,8 @@ function App() {
                 min="0.01"
                 step="any"
                 value={quantity}
-                onChange={(event) => {
-                  setQuantity(event.target.value)
-                  clearTree()
-                }}
                 aria-invalid={quantity !== '' && Number(quantity) <= 0}
+                readOnly
               />
             </Field>
 

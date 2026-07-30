@@ -82,6 +82,10 @@ export function replaceTreeVariant(nodes, treeId, replacement) {
     return {
       ...node,
       ANA_MALIYET: applyCostDelta(node.ANA_MALIYET, costDelta),
+      DOVIZ_BIRIMI: getInheritedCurrency(
+        childResult.nodes,
+        node.DOVIZ_BIRIMI,
+      ),
       children: childResult.nodes,
     }
   })
@@ -91,11 +95,19 @@ export function replaceTreeVariant(nodes, treeId, replacement) {
 
 function prioritizeParents(nodes) {
   return nodes
-    .map(({ children, ...node }) =>
-      children.length
-        ? { ...node, children: prioritizeParents(children) }
-        : node,
-    )
+    .map(({ children, ...node }) => {
+      if (!children.length) return node
+
+      const nextChildren = prioritizeParents(children)
+      return {
+        ...node,
+        DOVIZ_BIRIMI: getInheritedCurrency(
+          nextChildren,
+          node.DOVIZ_BIRIMI,
+        ),
+        children: nextChildren,
+      }
+    })
     .sort(
       (a, b) =>
         Number(Boolean(b.children?.length)) - Number(Boolean(a.children?.length)),
@@ -150,6 +162,12 @@ function normalizeTreeLevel(value) {
 function getNumericCost(value) {
   const cost = Number(value)
   return Number.isFinite(cost) ? cost : 0
+}
+
+function getInheritedCurrency(children, fallback) {
+  return (
+    children.find((child) => child.DOVIZ_BIRIMI)?.DOVIZ_BIRIMI ?? fallback
+  )
 }
 
 function applyCostDelta(value, delta) {

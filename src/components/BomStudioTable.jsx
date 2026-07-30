@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button'
 import {
   Card,
+  CardAction,
   CardContent,
   CardHeader,
   CardTitle,
@@ -42,6 +43,11 @@ export function BomStudioTable({
     () => flattenTree(rows, expandedIds),
     [expandedIds, rows],
   )
+  const totalCost = rows.reduce(
+    (total, row) => total + (Number(row.ANA_MALIYET) || 0),
+    0,
+  )
+  const currency = rows[0]?.DOVIZ_BIRIMI
 
   if (!rows.length) {
     return (
@@ -59,6 +65,12 @@ export function BomStudioTable({
         <Card className="bom-table-card" size="sm">
           <CardHeader>
             <CardTitle>Ağaç satırları</CardTitle>
+            <CardAction className="bom-total-cost">
+              <span>Toplam Maliyet:</span>
+              <output aria-live="polite">
+                {formatValue(totalCost)} {formatValue(currency)}
+              </output>
+            </CardAction>
           </CardHeader>
           <CardContent className="bom-table-content">
             <ScrollArea className="bom-table-scroll">
