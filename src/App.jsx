@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LoaderCircle, Search } from 'lucide-react'
+import { FileDown, LoaderCircle, Search } from 'lucide-react'
 import './App.css'
 import { Button } from '@/components/ui/button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -274,7 +274,7 @@ function App() {
         </header>
 
         <form className="search-panel" onSubmit={findProductTree}>
-          <FieldGroup className="search-fields">
+          <FieldGroup className="search-form-card">
             <SelectorField
               className="search-stock"
               id="stock-name"
@@ -345,6 +345,17 @@ function App() {
                 </SelectContent>
               </Select>
             </Field>
+          </FieldGroup>
+
+          <div className="search-actions-card">
+            <Button className="search-action" type="submit" disabled={loading.tree}>
+              {loading.tree ? (
+                <LoaderCircle className="loading-icon" data-icon="inline-start" />
+              ) : (
+                <Search data-icon="inline-start" />
+              )}
+              {loading.tree ? 'Bulunuyor...' : 'Ağacı göster'}
+            </Button>
 
             <div className="tree-actions" role="group" aria-label="Ağaç işlemleri">
               <Button
@@ -367,15 +378,17 @@ function App() {
               </Button>
             </div>
 
-            <Button className="search-action" type="submit" disabled={loading.tree}>
-              {loading.tree ? (
-                <LoaderCircle className="loading-icon" data-icon="inline-start" />
-              ) : (
-                <Search data-icon="inline-start" />
-              )}
-              {loading.tree ? 'Bulunuyor...' : 'Ağacı göster'}
+            <Button
+              className="pdf-action"
+              type="button"
+              variant="outline"
+              disabled
+              title="PDF dışa aktarma yakında"
+            >
+              <FileDown data-icon="inline-start" />
+              PDF Kaydet
             </Button>
-          </FieldGroup>
+          </div>
         </form>
 
         {message ? (
