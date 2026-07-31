@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { pdf } from '@react-pdf/renderer'
 import { FileDown, LoaderCircle, Search } from 'lucide-react'
 import './App.css'
 import { Button } from '@/components/ui/button'
@@ -15,6 +16,7 @@ import {
 import { getStokKartlar, getVaryantsByStokId } from './api/stokApi'
 import { LookupDialog } from './components/LookupDialog'
 import { BomStudioTable } from './components/BomStudioTable'
+import ProductTreePdf from './components/ProductTreePdf'
 import { SelectorField } from './components/SelectorField'
 import { costMethods } from './config/productTree'
 import { stockColumns, variantColumns } from './config/tableColumns'
@@ -34,6 +36,7 @@ const initialLoadingState = {
   rowVariants: false,
   extraVariants: false,
   extraTree: false,
+  pdf: false,
   tree: false,
 }
 
@@ -470,6 +473,43 @@ function App() {
     cancelExtraRow()
   }
 
+  async function savePdf() {
+    setMessage('')
+    setLoadingField('pdf', true)
+
+    try {
+      const reportCostMethod = treeCostMethod || costMethod
+      const blob = await pdf(
+        <ProductTreePdf
+          stock={selectedStock}
+          variant={selectedVariant}
+          quantity={tree[0]?.MIKTAR ?? quantity}
+          unit={tree[0]?.BIRIM ?? unit}
+          costMethod={
+            costMethods.find((method) => method.value === reportCostMethod)
+              ?.label ?? reportCostMethod
+          }
+          tree={tree}
+        />,
+      ).toBlob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      const stockCode = String(selectedStock?.STOK_KODU ?? 'urun-agaci').replace(
+        /[<>:"/\\|?*]/g,
+        '-',
+      )
+
+      link.href = url
+      link.download = `urun-agaci-${stockCode}.pdf`
+      link.click()
+      setTimeout(() => URL.revokeObjectURL(url), 0)
+    } catch (error) {
+      setMessage(`PDF oluşturulamadı: ${error.message}`)
+    } finally {
+      setLoadingField('pdf', false)
+    }
+  }
+
   function setLoadingField(key, value) {
     setLoading((current) => ({ ...current, [key]: value }))
   }
@@ -479,7 +519,7 @@ function App() {
       <div className="page-shell">
         <header className="page-header">
           <div>
-            <h1>Ürün Ağacı</h1>
+            <h1>Ürün Ağacı Maliyet Hesaplama</h1>
           </div>
         </header>
 
@@ -592,11 +632,15 @@ function App() {
               className="pdf-action"
               type="button"
               variant="outline"
-              disabled
-              title="PDF dışa aktarma yakında"
+              onClick={savePdf}
+              disabled={!tree.length || loading.tree || loading.pdf}
             >
-              <FileDown data-icon="inline-start" />
-              PDF Kaydet
+              {loading.pdf ? (
+                <LoaderCircle className="loading-icon" data-icon="inline-start" />
+              ) : (
+                <FileDown data-icon="inline-start" />
+              )}
+              {loading.pdf ? 'PDF oluşturuluyor...' : 'PDF Kaydet'}
             </Button>
           </div>
         </form>

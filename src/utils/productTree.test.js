@@ -10,12 +10,38 @@ const vite = await createServer({
 const {
   appendTreeChild,
   buildProductTree,
+  flattenProductTree,
   getTreeTotalCost,
   removeExtraTreeNode,
   replaceTreeVariant,
 } = await vite.ssrLoadModule('/src/utils/productTree.js')
 
 after(() => vite.close())
+
+test('PDF rows include every tree node in display order', () => {
+  const rows = flattenProductTree([
+    {
+      treeId: 'root',
+      children: [
+        { treeId: 'child-1', children: [] },
+        {
+          treeId: 'child-2',
+          children: [{ treeId: 'grandchild', children: [] }],
+        },
+      ],
+    },
+  ])
+
+  assert.deepEqual(
+    rows.map(({ treeId, depth }) => [treeId, depth]),
+    [
+      ['root', 0],
+      ['child-1', 1],
+      ['child-2', 1],
+      ['grandchild', 2],
+    ],
+  )
+})
 
 test('parents inherit child currency after build and variant replacement', async () => {
   const originalFetch = globalThis.fetch

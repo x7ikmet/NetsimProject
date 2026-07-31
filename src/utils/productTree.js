@@ -57,6 +57,13 @@ export function collectExpandableIds(nodes) {
   })
 }
 
+export function flattenProductTree(nodes, depth = 0) {
+  return nodes.flatMap((node) => [
+    { ...node, depth },
+    ...flattenProductTree(node.children ?? [], depth + 1),
+  ])
+}
+
 export function getTreeTotalCost(node) {
   const costRows = node.children?.length ? node.children : [node]
 
