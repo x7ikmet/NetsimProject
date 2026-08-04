@@ -24,6 +24,14 @@ public static class AuthEndpoints
         SignInManager<IdentityUser> signInManager
     )
     {
+        if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+        {
+            return Results.BadRequest(new
+            {
+                error = "Username and password are required."
+            });
+        }
+
         var result = await signInManager.PasswordSignInAsync(
             request.Username,
             request.Password,
