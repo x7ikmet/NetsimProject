@@ -17,6 +17,8 @@ public static class AuthEndpoints
         return endpoints;
     }
     private static async Task<IResult> LoginAsync(
+        HttpContext context,
+        IWebHostEnvironment environment,
         LoginRequest request,
         UserManager<IdentityUser> userManager,
         SignInManager<IdentityUser> signInManager,
@@ -43,7 +45,26 @@ public static class AuthEndpoints
             lockoutOnFailure: true
         );
 
-        return result.Succeeded ? Results.Ok(tokenService.Create(user)) : Results.Unauthorized();
+        if (!result.Succeeded)
+        {
+            return Results.Unauthorized();
+        }
+
+        var token = tokenService.Create(user);
+
+        context.Response.Cookies.Append(
+            JwtTokenService.CookieName,
+            token.AccessToken,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = !environment.IsDevelopment(),
+                SameSite = SameSiteMode.Strict,
+                Expires = new DateTimeOffset(token.ExpiresAtUtc),
+                Path = "/"
+            });
+
+        return Results.NoContent();
     }
 
 

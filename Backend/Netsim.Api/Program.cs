@@ -51,6 +51,16 @@ var jwtOptions = JwtOptions.FromConfiguration(builder.Configuration);
 
             NameClaimType = JwtRegisteredClaimNames.UniqueName
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                context.Token = context.Request.Cookies[JwtTokenService.CookieName];
+
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -65,7 +75,8 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(clientOrigin)
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 

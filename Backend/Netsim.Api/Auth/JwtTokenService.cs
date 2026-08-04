@@ -7,6 +7,8 @@ namespace Netsim.Api.Auth;
 
 public sealed class JwtTokenService(JwtOptions options)
 {
+    public const string CookieName = "netsim_access_token";
+
     public TokenResponse Create(IdentityUser user)
     {
         var now = DateTime.UtcNow;
@@ -42,5 +44,5 @@ public sealed class JwtTokenService(JwtOptions options)
 
 public sealed record TokenResponse(
     string AccessToken,
-    DateTime ExpriceAtUtc
+    DateTime ExpiresAtUtc
 );
