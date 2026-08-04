@@ -1,27 +1,33 @@
-# Logs
-logs
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Frontend
+Client/node_modules/
+Client/dist/
+Client/dist-ssr/
+Client/coverage/
+Client/*.local
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Backend
+Backend/**/bin/
+Backend/**/obj/
+Backend/**/TestResults/
+Backend/**/*.user
+Backend/**/*.suo
 
-# Editor directories and files
+# Editors and operating systems
+.vs/
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
+Thumbs.db
 *.sw?
-
 AGENTS.md
-

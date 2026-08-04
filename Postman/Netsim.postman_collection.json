@@ -1,0 +1,324 @@
+{
+  "info": {
+    "_postman_id": "b4ca14a6-2d45-41be-9b19-5d06f2c14a3a",
+    "name": "Netsim",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "47383481",
+    "_collection_link": "https://go.postman.co/collection/47383481-b4ca14a6-2d45-41be-9b19-5d06f2c14a3a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "STOK",
+      "item": [
+        {
+          "name": "Kartlar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{root}}/FastAPI/Stok/Kartlar",
+              "host": [
+                "{{root}}"
+              ],
+              "path": [
+                "FastAPI",
+                "Stok",
+                "Kartlar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Varyant Of Stok Kart",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"STOK_NO\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{root}}/FastAPI/Stok/VaryantById",
+              "host": [
+                "{{root}}"
+              ],
+              "path": [
+                "FastAPI",
+                "Stok",
+                "VaryantById"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Varyants Of Varyant",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"ANA_STOK_VARYANT_NO\": 4\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{root}}/FastAPI/Stok/VaryantsOfVaryant",
+              "host": [
+                "{{root}}"
+              ],
+              "path": [
+                "FastAPI",
+                "Stok",
+                "VaryantsOfVaryant"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ürün ağacı",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"STOK_VARYANT_NO\": 25\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{root}}/FastAPI/Stok/UrunAgaci",
+              "host": [
+                "{{root}}"
+              ],
+              "path": [
+                "FastAPI",
+                "Stok",
+                "UrunAgaci"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ürün ağacı V2",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"STOK_VARYANT_NO\": 22,\r\n  \"BIRIM\":\"Adet\",\r\n  \"MIKTAR\": 3\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{root}}/FastAPI/Stok/UrunAgaciV2",
+              "host": [
+                "{{root}}"
+              ],
+              "path": [
+                "FastAPI",
+                "Stok",
+                "UrunAgaciV2"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Ürün ağacı V2",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"STOK_VARYANT_NO\": 22,\r\n    \"BIRIM\": \"Adet\",\r\n    \"MIKTAR\": 3\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{root}}/FastAPI/Stok/UrunAgaciV2",
+                  "host": [
+                    "{{root}}"
+                  ],
+                  "path": [
+                    "FastAPI",
+                    "Stok",
+                    "UrunAgaciV2"
+                  ]
+                }
+              },
+              "status": "Accepted",
+              "code": 202,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=UTF-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "2623"
+                },
+                {
+                  "key": "Connection",
+                  "value": "Keep-Alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60, max=100"
+                },
+                {
+                  "key": "Server",
+                  "value": "Netsim System Agent HTTP Server v5.1"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"result\": true,\n    \"metadata\": {\n        \"SEVIYE\": {\n            \"type\": \"INTEGER\"\n        },\n        \"STOK_DETAY_NO\": {\n            \"type\": \"INTEGER\"\n        },\n        \"ANA_STOK_VARYANT_NO\": {\n            \"type\": \"INTEGER\"\n        },\n        \"STOK_VARYANT_NO\": {\n            \"type\": \"INTEGER\"\n        },\n        \"STOK_NO\": {\n            \"type\": \"INTEGER\"\n        },\n        \"STOK_TIP_ADI\": {\n            \"type\": \"VARCHAR\",\n            \"charLen\": 80\n        },\n        \"STOK_KODU\": {\n            \"type\": \"VARCHAR\",\n            \"charLen\": 24\n        },\n        \"STOK_ADI\": {\n            \"type\": \"VARCHAR\",\n            \"charLen\": 140\n        },\n        \"VARYANT_KODU\": {\n            \"type\": \"VARCHAR\",\n            \"charLen\": 24\n        },\n        \"VARYANT_ADI\": {\n            \"type\": \"VARCHAR\",\n            \"charLen\": 80\n        },\n        \"ACIKLAMA\": {\n            \"type\": \"VARCHAR\",\n            \"charLen\": 80\n        },\n        \"MIKTAR\": {\n            \"type\": \"DOUBLE PRECISION\"\n        },\n        \"BIRIM\": {\n            \"type\": \"VARCHAR\",\n            \"charLen\": 10\n        },\n        \"MIKTAR1\": {\n            \"type\": \"DOUBLE PRECISION\"\n        },\n        \"BIRIM_FIYAT\": {\n            \"type\": \"DOUBLE PRECISION\"\n        },\n        \"TUTAR\": {\n            \"type\": \"DOUBLE PRECISION\"\n        },\n        \"ANA_MALIYET\": {\n            \"type\": \"DOUBLE PRECISION\"\n        },\n        \"DOVIZ_BIRIMI\": {\n            \"type\": \"VARCHAR\",\n            \"charLen\": 4\n        },\n        \"TREE_PATH\": {\n            \"type\": \"VARCHAR\",\n            \"charLen\": 1000\n        }\n    },\n    \"dataset\": [\n        [\n            0,\n            null,\n            null,\n            22,\n            66,\n            \"MAMUL\",\n            \"MM006\",\n            \"RAFLI KİTAPLIK\",\n            \"00001\",\n            \"5 RAFLI KİTAPLIK VAR\",\n            null,\n            3,\n            \"Adet\",\n            null,\n            null,\n            null,\n            5352,\n            null,\n            \"/0/\"\n        ],\n        [\n            1,\n            61,\n            22,\n            19,\n            63,\n            \"YARI MAMUL\",\n            \"YM10\",\n            \"YAN PANEL MONTAJ\",\n            \"00001\",\n            \"yan panel montaj var\",\n            null,\n            3,\n            \"Adet\",\n            1,\n            null,\n            null,\n            1860,\n            null,\n            \"/0/61/\"\n        ],\n        [\n            2,\n            55,\n            19,\n            0,\n            54,\n            \"HAM MADDE\",\n            \"HM0A00024\",\n            \"YAN PANEL\",\n            \"--- ---\",\n            \"--- ---\",\n            null,\n            6,\n            \"Adet\",\n            2,\n            250,\n            1500,\n            1500,\n            \"TL\",\n            \"/0/61/55/\"\n        ],\n        [\n            2,\n            56,\n            19,\n            0,\n            55,\n            \"HAM MADDE\",\n            \"HM0A00025\",\n            \"RAF DESTEK ÇITASI\",\n            \"--- ---\",\n            \"--- ---\",\n            null,\n            12,\n            \"Adet\",\n            4,\n            30,\n            360,\n            360,\n            \"TL\",\n            \"/0/61/56/\"\n        ],\n        [\n            1,\n            62,\n            22,\n            20,\n            64,\n            \"YARI MAMUL\",\n            \"YM11\",\n            \"RAF MONTAJI\",\n            \"00001\",\n            \"5li raf montaj var\",\n            null,\n            3,\n            \"Adet\",\n            1,\n            null,\n            null,\n            1680,\n            null,\n            \"/0/62/\"\n        ],\n        [\n            2,\n            57,\n            20,\n            0,\n            56,\n            \"HAM MADDE\",\n            \"HM0A00026\",\n            \"RAF PANELİ\",\n            \"--- ---\",\n            \"--- ---\",\n            null,\n            15,\n            \"Adet\",\n            5,\n            100,\n            1500,\n            1500,\n            \"TL\",\n            \"/0/62/57/\"\n        ],\n        [\n            2,\n            58,\n            20,\n            0,\n            57,\n            \"HAM MADDE\",\n            \"HM0A00027\",\n            \"RAF GAĞLANTI PİMİ\",\n            \"--- ---\",\n            \"--- ---\",\n            null,\n            18,\n            \"Adet\",\n            6,\n            10,\n            180,\n            180,\n            \"TL\",\n            \"/0/62/58/\"\n        ],\n        [\n            1,\n            63,\n            22,\n            21,\n            65,\n            \"YARI MAMUL\",\n            \"YM12\",\n            \"ARKA PANEL MONTAJ\",\n            \"00001\",\n            \"arka panel montaj var\",\n            null,\n            3,\n            \"Adet\",\n            1,\n            null,\n            null,\n            1272,\n            null,\n            \"/0/63/\"\n        ],\n        [\n            2,\n            59,\n            21,\n            0,\n            58,\n            \"HAM MADDE\",\n            \"HM0A00028\",\n            \"ARKA SUNTA PANELİ\",\n            \"--- ---\",\n            \"--- ---\",\n            null,\n            3,\n            \"Adet\",\n            1,\n            400,\n            1200,\n            1200,\n            \"TL\",\n            \"/0/63/59/\"\n        ],\n        [\n            2,\n            60,\n            21,\n            0,\n            59,\n            \"HAM MADDE\",\n            \"HM0A00029\",\n            \"ÇİVİ\",\n            \"--- ---\",\n            \"--- ---\",\n            null,\n            36,\n            \"Adet\",\n            12,\n            2,\n            72,\n            72,\n            \"TL\",\n            \"/0/63/60/\"\n        ],\n        [\n            1,\n            64,\n            22,\n            0,\n            60,\n            \"HAM MADDE\",\n            \"HM0A00030\",\n            \"VİDA\",\n            \"--- ---\",\n            \"--- ---\",\n            null,\n            15,\n            \"Adet\",\n            5,\n            4,\n            60,\n            60,\n            \"TL\",\n            \"/0/64/\"\n        ],\n        [\n            1,\n            65,\n            22,\n            0,\n            61,\n            \"HAM MADDE\",\n            \"HM0A00031\",\n            \"MİNİFİX SETİ\",\n            \"--- ---\",\n            \"--- ---\",\n            null,\n            12,\n            \"Adet\",\n            4,\n            15,\n            180,\n            180,\n            \"TL\",\n            \"/0/65/\"\n        ],\n        [\n            1,\n            66,\n            22,\n            0,\n            62,\n            \"HAM MADDE\",\n            \"HM0A00032\",\n            \"PLASTİK AYAK TABANI\",\n            \"--- ---\",\n            \"--- ---\",\n            null,\n            12,\n            \"Adet\",\n            4,\n            25,\n            300,\n            300,\n            \"TL\",\n            \"/0/66/\"\n        ],\n        [\n            1,\n            67,\n            22,\n            0,\n            67,\n            \"#HİZMET\",\n            \"#007\",\n            \"İŞÇİLİK GİDERİ\",\n            \"--- ---\",\n            \"--- ---\",\n            null,\n            3,\n            \"Saat\",\n            1,\n            null,\n            null,\n            0,\n            null,\n            \"/0/67/\"\n        ]\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Ürün ağacı V3",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"MIKTAR\": 1,\r\n  \"BIRIM\": \"Adet\",\r\n  \"STOK_VARYANT_NO\": 22,\r\n  \"STOK_NO\":66,\r\n  \"MALIYET_YONTEMI\":\"\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{root}}/FastAPI/UrunAgaciV3",
+              "host": [
+                "{{root}}"
+              ],
+              "path": [
+                "FastAPI",
+                "UrunAgaciV3"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "firmalar",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:82/crud/FastAPI/firmalar",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "82",
+          "path": [
+            "crud",
+            "FastAPI",
+            "firmalar"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "New Request",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"CARINO\": 1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:82/crud/FastAPI/hi",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "82",
+          "path": [
+            "crud",
+            "FastAPI",
+            "hi"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "New Request",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "root",
+      "value": ""
+    }
+  ]
+}
