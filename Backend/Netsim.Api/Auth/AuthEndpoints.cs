@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 
 namespace Netsim.Api.Auth;
 
@@ -12,8 +11,6 @@ public static class AuthEndpoints
         var auth = endpoints.MapGroup("/auth");
 
         auth.MapPost("/login", LoginAsync);
-        auth.MapPost("/logout", LogoutAsync)
-            .RequireAuthorization();
         auth.MapGet("/me", GetCurrentUser)
             .RequireAuthorization();
         
@@ -21,7 +18,9 @@ public static class AuthEndpoints
     }
     private static async Task<IResult> LoginAsync(
         LoginRequest request,
-        SignInManager<IdentityUser> signInManager
+        UserManager<IdentityUser> userManager,
+        SignInManager<IdentityUser> signInManager,
+        JwtTokenService tokenService
     )
     {
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
@@ -32,23 +31,21 @@ public static class AuthEndpoints
             });
         }
 
-        var result = await signInManager.PasswordSignInAsync(
-            request.Username,
+        var user = await userManager.FindByNameAsync(request.Username);
+        if(user is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var result = await signInManager.CheckPasswordSignInAsync(
+            user,
             request.Password,
-            isPersistent: false,
             lockoutOnFailure: true
         );
 
-        return result.Succeeded ? Results.NoContent() : Results.Unauthorized();
+        return result.Succeeded ? Results.Ok(tokenService.Create(user)) : Results.Unauthorized();
     }
 
-    private static async Task<IResult> LogoutAsync(
-        SignInManager<IdentityUser> signInManager
-    )
-    {
-        await signInManager.SignOutAsync();
-        return Results.NoContent();
-    }
 
     private static IResult GetCurrentUser(HttpContext context)
     {
