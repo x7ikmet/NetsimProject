@@ -55,6 +55,21 @@ var jwtOptions = JwtOptions.FromConfiguration(builder.Configuration);
 
 builder.Services.AddAuthorization();
 
+var clientOrigin =
+    builder.Configuration["CLIENT_ORIGIN"]
+    ?? throw new InvalidOperationException("CLIENT_ORIGIN is missing.");
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Client", policy =>
+    {
+        policy
+            .WithOrigins(clientOrigin)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+
 var app = builder.Build();
 
 if (await UserProvisioning.TryRunAsync(app, args))
@@ -63,10 +78,10 @@ if (await UserProvisioning.TryRunAsync(app, args))
 }
 
 
+app.UseCors("Client");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/", () => "Hello World!");
 app.MapAuthEndpoints();
 
 app.Run();
