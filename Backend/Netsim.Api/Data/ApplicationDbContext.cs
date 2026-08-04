@@ -6,24 +6,25 @@ public sealed class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options)
     : IdentityDbContext(options)
 {
+    public const int IdentityKeyLength = 64;
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
         builder.Entity<IdentityUser>()
-            .Property(x => x.Id).HasMaxLength(64);
+            .Property(x => x.Id).HasMaxLength(IdentityKeyLength);
         builder.Entity<IdentityRole>()
-            .Property(x => x.Id).HasMaxLength(64);
+            .Property(x => x.Id).HasMaxLength(IdentityKeyLength);
         builder.Entity<IdentityRoleClaim<string>>()
-            .Property(x => x.RoleId).HasMaxLength(64);
+            .Property(x => x.RoleId).HasMaxLength(IdentityKeyLength);
         builder.Entity<IdentityUserClaim<string>>()
-            .Property(x => x.UserId).HasMaxLength(64);
+            .Property(x => x.UserId).HasMaxLength(IdentityKeyLength);
         builder.Entity<IdentityUserLogin<string>>()
-            .Property(x => x.UserId).HasMaxLength(64);
+            .Property(x => x.UserId).HasMaxLength(IdentityKeyLength);
         builder.Entity<IdentityUserRole<string>>()
-            .Property(x => x.UserId).HasMaxLength(64);
+            .Property(x => x.UserId).HasMaxLength(IdentityKeyLength);
         builder.Entity<IdentityUserRole<string>>()
-            .Property(x => x.RoleId).HasMaxLength(64);
+            .Property(x => x.RoleId).HasMaxLength(IdentityKeyLength);
         builder.Entity<IdentityUserToken<string>>()
-            .Property(x => x.UserId).HasMaxLength(64);
+            .Property(x => x.UserId).HasMaxLength(IdentityKeyLength);
     }
 }
