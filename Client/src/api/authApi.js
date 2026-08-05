@@ -23,7 +23,7 @@ export async function login(username, password) {
 }
 
 export async function getCurrentUser() {
-  const response = await fetch(endpoint('/auth/me'),{
+  const response = await fetch(endpoint('/auth/me'), {
     credentials: 'include',
   })
   if (response.status === 401) {
@@ -36,11 +36,11 @@ export async function getCurrentUser() {
 }
 
 export async function logout() {
-    const response = await fetch(endpoint('/auth/logout'), {
-        method: 'POST',
-        credentials: 'include',
-    })
-    if (!response.ok) {
-        throw new Error('Logout failed.')
-    }
+  const response = await fetch(endpoint('/auth/logout'), {
+    method: 'POST',
+    credentials: 'include',
+  })
+  if (!response.ok) {
+    throw new Error('Logout failed.')
+  }
 }
