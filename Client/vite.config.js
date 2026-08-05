@@ -20,7 +20,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/crud': {
-        target: 'http://localhost:82',
+        target: 'http://localhost:5159',
         changeOrigin: true,
       },
     },

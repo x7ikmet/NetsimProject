@@ -1,3 +1,5 @@
+import { getCsrfToken } from './authApi'
+
 const API_ROOT = import.meta.env.VITE_API_ROOT ?? '/crud'
 
 function endpoint(path) {
@@ -26,9 +28,17 @@ function normalizeDataset(response) {
 }
 
 async function requestJson(path, options = {}) {
+  const method = (options.method ?? 'GET').toUpperCase()
+  const requiresCsrf = !['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method)
+  const csrfHeader = requiresCsrf
+    ? { 'X-CSRF-TOKEN': await getCsrfToken() }
+    : {}
+
   const response = await fetch(endpoint(path), {
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      ...csrfHeader,
       ...(options.headers ?? {}),
     },
     ...options,

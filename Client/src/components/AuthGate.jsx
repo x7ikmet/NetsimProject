@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import {
-  Boxes,
   LoaderCircle,
   LockKeyhole,
   LogOut,
@@ -65,9 +64,6 @@ export function AuthGate({ children }) {
   if (user === undefined) {
     return (
       <main className="auth-loading" aria-busy="true">
-        <div className="auth-loading-mark" aria-hidden="true">
-          <Boxes />
-        </div>
         <LoaderCircle className="auth-spinner" aria-hidden="true" />
         <p role="status">Oturum kontrol ediliyor</p>
       </main>

@@ -25,7 +25,7 @@ export async function login(username, password) {
   }
 }
 
-async function getCsrfToken() {
+export async function getCsrfToken() {
   if (csrfToken) return csrfToken
 
   const response = await fetch(endpoint('/auth/csrf'), {

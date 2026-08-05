@@ -3,6 +3,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Yarp.ReverseProxy.Configuration;
+using Microsoft.AspNetCore.Antiforgery;
 using Netsim.Api.Data;
 using Netsim.Api.Auth;
 
@@ -85,6 +87,39 @@ builder.Services.AddAntiforgery(options =>
    options.HeaderName = "X-CSRF-TOKEN"; 
 });
 
+var n4BaseUrl =
+    builder.Configuration["N4_BASE_URL"]
+    ?? throw new InvalidOperationException("N4_BASE_URL is missing.");
+
+builder.Services
+    .AddReverseProxy()
+    .LoadFromMemory(
+        new[]
+        {
+            new RouteConfig
+            {
+                RouteId = "n4-crud",
+                ClusterId = "n4",
+                Match = new RouteMatch
+                {
+                    Path = "/crud/{**remaining}"
+                }
+            }
+        },
+        new[]
+        {
+            new ClusterConfig
+            {
+                ClusterId = "n4",
+                Destinations = new Dictionary<string, DestinationConfig>
+                {
+                    ["primary"] = new()
+                    {
+                        Address = n4BaseUrl
+                    }
+                }
+            }
+        });
 
 var app = builder.Build();
 
@@ -100,5 +135,32 @@ app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapAuthEndpoints();
+
+app.MapReverseProxy(proxyPipeline =>
+{
+    proxyPipeline.Use(async (context, next) =>
+    {
+        var method = context.Request.Method;
+        var requiresCsrf =
+            !HttpMethods.IsGet(method) &&
+            !HttpMethods.IsHead(method) &&
+            !HttpMethods.IsOptions(method) &&
+            !HttpMethods.IsTrace(method);
+        if (requiresCsrf)
+        {
+            var antiforgery =
+                context.RequestServices.GetRequiredService<IAntiforgery>()
+                ;
+            if (!await antiforgery.IsRequestValidAsync(context))
+            {
+                context.Response.StatusCode =
+                StatusCodes.Status400BadRequest;
+                return;
+            }
+        }
+        await next();
+    });
+})
+.RequireAuthorization();
 
 app.Run();
