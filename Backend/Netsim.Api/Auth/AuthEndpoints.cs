@@ -13,6 +13,7 @@ public static class AuthEndpoints
         auth.MapPost("/login", LoginAsync);
         auth.MapGet("/me", GetCurrentUser)
             .RequireAuthorization();
+        auth.MapPost("/logout", LogoutAsync);
         
         return endpoints;
     }
@@ -78,5 +79,18 @@ public static class AuthEndpoints
 
     public sealed record LoginRequest(string Username, string Password);
 
+    private static IResult LogoutAsync(HttpContext context)
+    {
+        context.Response.Cookies.Delete(
+            JwtTokenService.CookieName,
+            new CookieOptions
+            {
+                Path = "/"
+            }
+        );
+        return Results.NoContent();
+    }
 }
+
+
 
