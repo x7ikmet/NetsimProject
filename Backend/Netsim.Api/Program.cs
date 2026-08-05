@@ -80,6 +80,11 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddAntiforgery(options =>
+{
+   options.HeaderName = "X-CSRF-TOKEN"; 
+});
+
 
 var app = builder.Build();
 
@@ -92,6 +97,7 @@ if (await UserProvisioning.TryRunAsync(app, args))
 app.UseCors("Client");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAntiforgery();
 
 app.MapAuthEndpoints();
 

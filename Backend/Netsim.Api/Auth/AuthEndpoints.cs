@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 
 namespace Netsim.Api.Auth;
@@ -14,6 +15,8 @@ public static class AuthEndpoints
         auth.MapGet("/me", GetCurrentUser)
             .RequireAuthorization();
         auth.MapPost("/logout", LogoutAsync);
+        auth.MapGet("/csrf", GetCsrfToken)
+            .RequireAuthorization();
         
         return endpoints;
     }
@@ -79,8 +82,14 @@ public static class AuthEndpoints
 
     public sealed record LoginRequest(string Username, string Password);
 
-    private static IResult LogoutAsync(HttpContext context)
+    private static async Task<IResult> LogoutAsync(
+        HttpContext context,
+        IAntiforgery antiforgery)
     {
+        if(!await antiforgery.IsRequestValidAsync(context))
+        {
+            return Results.BadRequest();
+        }
         context.Response.Cookies.Delete(
             JwtTokenService.CookieName,
             new CookieOptions
@@ -89,6 +98,18 @@ public static class AuthEndpoints
             }
         );
         return Results.NoContent();
+    }
+
+    private static IResult GetCsrfToken(
+        HttpContext context,
+        IAntiforgery antiforgery)
+    {
+        var tokens = antiforgery.GetAndStoreTokens(context);
+
+        return Results.Ok(new
+        {
+            token = tokens.RequestToken
+        });
     }
 }
 
