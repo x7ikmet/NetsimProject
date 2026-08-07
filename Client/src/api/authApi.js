@@ -60,17 +60,27 @@ export async function getCurrentUser() {
 }
 
 export async function logout() {
-  const token = await getCsrfToken()
+  let token = null
+
+  try {
+    token = await getCsrfToken()
+  } catch {
+    // An expired session cannot obtain a CSRF token, but logout still clears its cookie.
+  }
+
   const response = await fetch(endpoint('/auth/logout'), {
     method: 'POST',
     credentials: 'include',
-    headers: {
-      'X-CSRF-TOKEN': token,
-    },
+    headers: token ? { 'X-CSRF-TOKEN': token } : {},
   })
   if (!response.ok) {
     throw new Error('Logout failed.')
   }
 
   csrfToken = null
+}
+
+export function expireSession() {
+  csrfToken = null
+  window.dispatchEvent(new Event('netsim:session-expired'))
 }

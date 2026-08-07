@@ -1,4 +1,4 @@
-import { getCsrfToken } from './authApi'
+import { expireSession, getCsrfToken } from './authApi'
 
 const API_ROOT = import.meta.env.VITE_API_ROOT ?? '/crud'
 
@@ -43,6 +43,11 @@ async function requestJson(path, options = {}) {
     },
     ...options,
   })
+
+  if (response.status === 401) {
+    expireSession()
+    throw new Error('Session expired.')
+  }
 
   if (!response.ok) {
     throw new Error(`API request failed (${response.status})`)

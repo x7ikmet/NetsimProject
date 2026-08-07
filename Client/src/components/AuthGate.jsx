@@ -21,6 +21,20 @@ export function AuthGate({ children }) {
     getCurrentUser()
       .then(setUser)
       .catch(() => setUser(null))
+
+    function handleSessionExpired() {
+      setUser(null)
+      setPassword('')
+      setError('Oturum süreniz doldu. Lütfen tekrar giriş yapın.')
+    }
+    window.addEventListener('netsim:session-expired', handleSessionExpired)
+
+    return () => {
+      window.removeEventListener(
+        'netsim:session-expired',
+        handleSessionExpired,
+      )
+    }
   }, [])
 
   async function handleSubmit(event) {

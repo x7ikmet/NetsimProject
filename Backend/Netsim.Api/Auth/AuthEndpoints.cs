@@ -86,7 +86,8 @@ public static class AuthEndpoints
         HttpContext context,
         IAntiforgery antiforgery)
     {
-        if(!await antiforgery.IsRequestValidAsync(context))
+        if(context.User.Identity?.IsAuthenticated == true &&
+            !await antiforgery.IsRequestValidAsync(context))
         {
             return Results.BadRequest();
         }
