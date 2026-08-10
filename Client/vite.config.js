@@ -19,11 +19,15 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      '/auth': {
+        target: 'http://localhost:5159',
+        changeOrigin: true,
+        },
       '/crud': {
         target: 'http://localhost:5159',
         changeOrigin: true,
       },
     },
-    allowedHosts: ['bf90-94-55-20-98.ngrok-free.app']
+    allowedHosts: ['.ngrok-free.app']
   },
 })
