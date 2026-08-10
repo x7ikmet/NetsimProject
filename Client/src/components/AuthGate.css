@@ -211,7 +211,33 @@
   background: #ffffff;
 }
 
+.auth-password-input[data-slot='input-group'] {
+  height: 50px;
+  border-color: #99acc0;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.auth-password-input [data-slot='input-group-control'] {
+  padding-left: 44px;
+}
+
+.auth-password-input [data-slot='input-group-addon'] [data-slot='button'] {
+  color: var(--hs-ink-muted, #516f90);
+}
+
+.auth-password-input [data-slot='input-group-addon'] [data-slot='button']:hover {
+  color: var(--hs-navy, #213343);
+}
+
 .auth-input-wrap [data-slot='input']:focus-visible {
+  border-color: var(--hs-focus, #2f7579);
+  box-shadow: 0 0 0 3px rgba(47, 117, 121, 0.16);
+}
+
+.auth-password-input[data-slot='input-group']:has(
+    [data-slot='input-group-control']:focus-visible
+  ) {
   border-color: var(--hs-focus, #2f7579);
   box-shadow: 0 0 0 3px rgba(47, 117, 121, 0.16);
 }
@@ -234,7 +260,7 @@
   border-radius: 9px;
   font-size: 15px;
   font-weight: 680;
-  box-shadow: 0 8px 24px rgba(255, 72, 0, 0.18);
+  /* box-shadow: 0 8px 24px rgba(255, 72, 0, 0.18); */
 }
 
 .auth-support {

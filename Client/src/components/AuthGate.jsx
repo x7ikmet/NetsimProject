@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
+  Eye,
+  EyeOff,
   LoaderCircle,
   LockKeyhole,
   LogOut,
@@ -8,14 +10,24 @@ import {
 import { getCurrentUser, login, logout } from '../api/authApi'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from './ui/input-group'
 import './AuthGate.css'
 
 export function AuthGate({ children }) {
   const [user, setUser] = useState(undefined)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const passwordVisibilityLabel = isPasswordVisible
+    ? 'Şifreyi gizle'
+    : 'Şifreyi göster'
 
   useEffect(() => {
     getCurrentUser()
@@ -130,16 +142,33 @@ export function AuthGate({ children }) {
               <label htmlFor="password">Şifre</label>
               <div className="auth-input-wrap">
                 <LockKeyhole aria-hidden="true" />
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  disabled={submitting}
-                  required
-                />
+                <InputGroup className="auth-password-input">
+                  <InputGroupInput
+                    id="password"
+                    name="password"
+                    type={isPasswordVisible ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    disabled={submitting}
+                    required
+                  />
+                  <InputGroupAddon>
+                    <InputGroupButton
+                      size="icon-sm"
+                      onClick={() => setIsPasswordVisible((visible) => !visible)}
+                      disabled={submitting}
+                      aria-label={passwordVisibilityLabel}
+                      title={passwordVisibilityLabel}
+                    >
+                      {isPasswordVisible ? (
+                        <EyeOff data-icon="inline-start" />
+                      ) : (
+                        <Eye data-icon="inline-start" />
+                      )}
+                    </InputGroupButton>
+                  </InputGroupAddon>
+                </InputGroup>
               </div>
             </div>
 
