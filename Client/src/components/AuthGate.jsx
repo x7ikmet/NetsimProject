@@ -4,12 +4,12 @@ import {
   EyeOff,
   LoaderCircle,
   LockKeyhole,
-  LogOut,
   UserRound,
 } from 'lucide-react'
 import { getCurrentUser, login, logout } from '../api/authApi'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
+import { AppShell } from './AppShell'
 import {
   InputGroup,
   InputGroupAddon,
@@ -189,32 +189,13 @@ export function AuthGate({ children }) {
   }
 
   return (
-    <div className="authenticated-app">
-      <div className="session-bar">
-        <div className="session-identity">
-          <span aria-hidden="true">
-            <UserRound />
-          </span>
-          <div>
-            <strong>{user.username}</strong>
-          </div>
-        </div>
-        {error ? <p role="alert">{error}</p> : null}
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleLogout}
-          disabled={submitting}
-        >
-          {submitting ? (
-            <LoaderCircle className="auth-spinner" aria-hidden="true" />
-          ) : (
-            <LogOut aria-hidden="true" />
-          )}
-          Çıkış yap
-        </Button>
-      </div>
+    <AppShell
+      user={user}
+      error={error}
+      submitting={submitting}
+      onLogout={handleLogout}
+    >
       {children}
-    </div>
+    </AppShell>
   )
 }

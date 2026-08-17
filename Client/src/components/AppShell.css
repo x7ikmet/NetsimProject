@@ -1,0 +1,166 @@
+.app-shell {
+  --sidebar-width: 13rem;
+  min-height: 100svh;
+  background: var(--hs-canvas, #f8f5ee);
+}
+
+.app-sidebar [data-slot='sidebar-inner'] {
+  overflow: hidden;
+  border: 1px solid var(--sidebar-border);
+}
+
+.app-sidebar-header {
+  min-height: 62px;
+  justify-content: center;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.app-brand,
+.app-user {
+  cursor: default;
+}
+
+.app-brand:hover,
+.app-user:hover {
+  color: var(--sidebar-foreground);
+  background: transparent;
+}
+
+.app-brand-mark,
+.app-user-mark {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.app-brand-mark {
+  color: var(--sidebar-primary-foreground);
+  background: var(--sidebar-primary);
+}
+
+.app-user-mark {
+  color: var(--sidebar-accent-foreground);
+  background: var(--sidebar-accent);
+}
+
+.app-brand > span:last-child,
+.app-user > span:last-child {
+  display: grid;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.app-brand strong,
+.app-user strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-brand small,
+.app-user small {
+  color: var(--muted-foreground);
+  font-size: 10px;
+}
+
+.app-navigation {
+  gap: 6px;
+}
+
+.app-navigation [data-slot='sidebar-menu-button'] {
+  min-height: 42px;
+  border: 1px solid transparent;
+}
+
+.app-navigation [data-active] {
+  border-color: var(--sidebar-border);
+}
+
+.app-sidebar-footer {
+  border-top: 1px solid var(--sidebar-border);
+}
+
+.app-main-shell {
+  min-width: 0;
+  min-height: calc(100svh - 16px);
+  margin: 8px 8px 8px 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--background);
+}
+
+.app-topbar {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+.app-topbar-spacer {
+  flex: 1;
+}
+
+.app-topbar > p {
+  margin: 0;
+  color: var(--destructive);
+  font-size: 13px;
+}
+
+.app-route {
+  min-width: 0;
+  flex: 1;
+}
+
+.scenarios-page {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+}
+
+.scenarios-page-header h1 {
+  margin: 0;
+  color: var(--hs-navy, #213343);
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+
+.scenarios-page-header p {
+  margin: 6px 0 0;
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+
+.scenarios-placeholder {
+  flex: 1;
+  justify-content: center;
+  text-align: center;
+}
+
+.scenarios-placeholder [data-slot='card-header'] {
+  align-content: center;
+}
+
+@media (max-width: 767px) {
+  .app-main-shell {
+    min-height: 100svh;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .app-topbar {
+    position: sticky;
+    top: 0;
+  }
+}

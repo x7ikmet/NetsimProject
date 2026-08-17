@@ -71,7 +71,7 @@ export function BomStudioTable({
     return (
       <Card className="bom-empty-card" size="sm">
         <CardHeader>
-          <CardTitle>Ürün ağacı görünümü</CardTitle>
+          <CardTitle>Ürün ağacı</CardTitle>
         </CardHeader>
       </Card>
     )
