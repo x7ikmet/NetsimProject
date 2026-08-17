@@ -35,7 +35,6 @@ public sealed class ApplicationDbContext(
         builder.Entity<IdentityUserToken<string>>()
             .Property(x => x.UserId).HasMaxLength(IdentityKeyLength);
 
-        builder.HasSequence<int>("SENARYO_NO");
         builder.ApplyConfiguration(new ScenarioConfiguration());
     }
 }

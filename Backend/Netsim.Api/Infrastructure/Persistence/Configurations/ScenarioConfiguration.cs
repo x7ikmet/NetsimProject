@@ -13,7 +13,7 @@ public sealed class ScenarioConfiguration : IEntityTypeConfiguration<Scenario>
 
         entity.Property(x => x.ScenarioNo)
             .HasColumnName("SENARYO_NO")
-            .ValueGeneratedOnAdd();
+            .UseSequenceTrigger();
         entity.Property(x => x.UserId)
             .HasColumnName("KULLANICI_ID")
             .HasMaxLength(ApplicationDbContext.IdentityKeyLength);
