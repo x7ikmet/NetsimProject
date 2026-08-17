@@ -1,125 +1,14 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Yarp.ReverseProxy.Configuration;
-using Microsoft.AspNetCore.Antiforgery;
-using Netsim.Api.Data;
-using Netsim.Api.Auth;
+using Netsim.Api.Infrastructure;
+using Netsim.Api.Infrastructure.Authentication;
+using Netsim.Api.Infrastructure.Endpoints;
+using Netsim.Api.Infrastructure.Proxy;
 
 DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString =
-    builder.Configuration.GetConnectionString("IdentityDatabase")
-    ?? throw new InvalidOperationException(
-        "Connection string 'IdentityDatabase' was not found.");
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseFirebird(connectionString));
-builder.Services
-    .AddIdentityCore<IdentityUser>(options =>
-        options.Stores.MaxLengthForKeys =
-            ApplicationDbContext.IdentityKeyLength)
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddSignInManager();
-
-var jwtOptions = JwtOptions.FromConfiguration(builder.Configuration);
-
-  builder.Services.AddSingleton(jwtOptions);
-  builder.Services.AddSingleton<JwtTokenService>();
-
-  builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.MapInboundClaims = false;
-
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = jwtOptions.Issuer,
-
-            ValidateAudience = true,
-            ValidAudience = jwtOptions.Audience,
-
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(jwtOptions.Key),
-
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromSeconds(30),
-
-            NameClaimType = JwtRegisteredClaimNames.UniqueName
-        };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                context.Token = context.Request.Cookies[JwtTokenService.CookieName];
-
-                return Task.CompletedTask;
-            }
-        };
-    });
-
-builder.Services.AddAuthorization();
-
-var clientOrigin =
-    builder.Configuration["CLIENT_ORIGIN"]
-    ?? throw new InvalidOperationException("CLIENT_ORIGIN is missing.");
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("Client", policy =>
-    {
-        policy
-            .WithOrigins(clientOrigin)
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
-});
-
-builder.Services.AddAntiforgery(options =>
-{
-   options.HeaderName = "X-CSRF-TOKEN"; 
-});
-
-var n4BaseUrl =
-    builder.Configuration["N4_BASE_URL"]
-    ?? throw new InvalidOperationException("N4_BASE_URL is missing.");
-
-builder.Services
-    .AddReverseProxy()
-    .LoadFromMemory(
-        new[]
-        {
-            new RouteConfig
-            {
-                RouteId = "n4-crud",
-                ClusterId = "n4",
-                Match = new RouteMatch
-                {
-                    Path = "/crud/{**remaining}"
-                }
-            }
-        },
-        new[]
-        {
-            new ClusterConfig
-            {
-                ClusterId = "n4",
-                Destinations = new Dictionary<string, DestinationConfig>
-                {
-                    ["primary"] = new()
-                    {
-                        Address = n4BaseUrl
-                    }
-                }
-            }
-        });
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddEndpoints(typeof(Program).Assembly);
 
 var app = builder.Build();
 
@@ -128,39 +17,15 @@ if (await UserProvisioning.TryRunAsync(app, args))
     return;
 }
 
-
-app.UseCors("Client");
+app.UseExceptionHandler();
+app.UseCors(DependencyInjection.ClientCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-app.MapAuthEndpoints();
-
-app.MapReverseProxy(proxyPipeline =>
-{
-    proxyPipeline.Use(async (context, next) =>
-    {
-        var method = context.Request.Method;
-        var requiresCsrf =
-            !HttpMethods.IsGet(method) &&
-            !HttpMethods.IsHead(method) &&
-            !HttpMethods.IsOptions(method) &&
-            !HttpMethods.IsTrace(method);
-        if (requiresCsrf)
-        {
-            var antiforgery =
-                context.RequestServices.GetRequiredService<IAntiforgery>()
-                ;
-            if (!await antiforgery.IsRequestValidAsync(context))
-            {
-                context.Response.StatusCode =
-                StatusCodes.Status400BadRequest;
-                return;
-            }
-        }
-        await next();
-    });
-})
-.RequireAuthorization();
+app.MapEndpoints();
+app.MapN4ReverseProxy();
 
 app.Run();
+
+public partial class Program;

@@ -1,5 +1,5 @@
 
-namespace Netsim.Api.Auth;
+namespace Netsim.Api.Infrastructure.Authentication;
 
 public sealed record JwtOptions(
     string Issuer,
@@ -13,9 +13,9 @@ public sealed record JwtOptions(
         var issuer = configuration["JWT_ISSUER"]
             ?? throw new InvalidOperationException("JWT_ISSUER is missing");
         var audience = configuration["JWT_AUDIENCE"]
-            ?? throw new InvalidOperationException("JWT_ISSUER is missing");
+            ?? throw new InvalidOperationException("JWT_AUDIENCE is missing");
         var encodedKey = configuration["JWT_KEY"]
-            ?? throw new InvalidOperationException("JWT_ISSUER is missing");
+            ?? throw new InvalidOperationException("JWT_KEY is missing");
 
         byte[] key;
         try

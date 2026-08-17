@@ -3,7 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Netsim.Api.Auth;
+namespace Netsim.Api.Infrastructure.Authentication;
 
 public sealed class JwtTokenService(JwtOptions options)
 {

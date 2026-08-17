@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace Netsim.Api.Auth;
+namespace Netsim.Api.Infrastructure.Authentication;
 public static class UserProvisioning
 {
     public static async Task<bool> TryRunAsync(
