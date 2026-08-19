@@ -1,6 +1,12 @@
 import { useEffect, useEffectEvent, useState } from 'react'
 import { pdf } from '@react-pdf/renderer'
-import { FileDown, LoaderCircle, Save, Search } from 'lucide-react'
+import {
+  FileDown,
+  FileSpreadsheet,
+  LoaderCircle,
+  PackageCheck,
+  Search,
+} from 'lucide-react'
 import './App.css'
 import { Button } from '@/components/ui/button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -531,11 +537,11 @@ function App() {
     }
   }
 
-  function openSaveScenario() {
-    setMessage('')
-    setSaveScenarioError('')
-    setSaveScenarioOpen(true)
-  }
+//   function openSaveScenario() {
+//     setMessage('')
+//     setSaveScenarioError('')
+//     setSaveScenarioOpen(true)
+//   }
 
   async function saveScenario(name) {
     const root = tree[0]
@@ -678,14 +684,14 @@ function App() {
             </Field>
           </FieldGroup>
 
-          <div className="search-actions-card">
+          <div className="tree-actions-card">
             <Button className="search-action" type="submit" disabled={loading.tree}>
               {loading.tree ? (
                 <LoaderCircle className="loading-icon" data-icon="inline-start" />
               ) : (
                 <Search data-icon="inline-start" />
               )}
-              {loading.tree ? 'Bulunuyor...' : 'Ağacı göster'}
+              {loading.tree ? 'Bulunuyor...' : 'Ağacı Göster'}
             </Button>
 
             <div className="tree-actions" role="group" aria-label="Ağaç işlemleri">
@@ -709,19 +715,26 @@ function App() {
               </Button>
             </div>
 
+          </div>
+
+          <div
+            className="export-actions-card"
+            role="group"
+            aria-label="Kayıt ve dışa aktarma işlemleri"
+          >
             <div className="save-actions">
+
               <Button
                 type="button"
                 variant="outline"
-                onClick={openSaveScenario}
-                disabled={!tree.length || loading.tree || loading.scenario}
+                disabled
+                title="Yakında"
               >
-                <Save data-icon="inline-start" />
-                Senaryo Kaydet
+                <PackageCheck data-icon="inline-start" />
+                Varyant Kaydet
               </Button>
 
               <Button
-                className="pdf-action"
                 type="button"
                 variant="outline"
                 onClick={savePdf}
@@ -734,6 +747,16 @@ function App() {
                   <FileDown data-icon="inline-start" />
                 )}
                 {loading.pdf ? 'PDF oluşturuluyor...' : 'PDF Kaydet'}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                disabled
+                title="Yakında"
+              >
+                <FileSpreadsheet data-icon="inline-start" />
+                Excel Kaydet
               </Button>
             </div>
           </div>

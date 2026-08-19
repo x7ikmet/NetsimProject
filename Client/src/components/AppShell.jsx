@@ -38,38 +38,41 @@ export function AppShell({ children, user, error, submitting, onLogout }) {
   return (
     <TooltipProvider>
       <SidebarProvider className="app-shell">
-        <AppSidebar
-          pathname={pathname}
-          username={user.username}
-          onNavigate={navigate}
-        />
+        <header className="app-topbar">
+          <SidebarTrigger className="app-sidebar-trigger" />
+          <span className="app-topbar-title">Ürün Ağacı Maliyet Aracı</span>
+          <div className="app-topbar-spacer" />
+          {error ? <p role="alert">{error}</p> : null}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onLogout}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <LoaderCircle className="auth-spinner" aria-hidden="true" />
+            ) : (
+              <LogOut data-icon="inline-start" aria-hidden="true" />
+            )}
+            Çıkış yap
+          </Button>
+        </header>
 
-        <SidebarInset className="app-main-shell">
-          <header className="app-topbar">
-            <SidebarTrigger className="app-sidebar-trigger" />
-            <div className="app-topbar-spacer" />
-            {error ? <p role="alert">{error}</p> : null}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onLogout}
-              disabled={submitting}
-            >
-              {submitting ? (
-                <LoaderCircle className="auth-spinner" aria-hidden="true" />
-              ) : (
-                <LogOut data-icon="inline-start" aria-hidden="true" />
-              )}
-              Çıkış yap
-            </Button>
-          </header>
+        <div className="app-workspace">
+          <AppSidebar
+            pathname={pathname}
+            username={user.username}
+            onNavigate={navigate}
+          />
 
-          <div className="app-route" hidden={pathname !== '/'}>
-            {children}
-          </div>
-          {pathname === '/scenarios' ? <ScenariosPage /> : null}
-          {pathname === '/settings' ? <SettingsPage /> : null}
-        </SidebarInset>
+          <SidebarInset className="app-main-shell">
+            <div className="app-route" hidden={pathname !== '/'}>
+              {children}
+            </div>
+            {pathname === '/scenarios' ? <ScenariosPage /> : null}
+            {pathname === '/settings' ? <SettingsPage /> : null}
+          </SidebarInset>
+        </div>
       </SidebarProvider>
     </TooltipProvider>
   )
