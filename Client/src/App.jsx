@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import { pdf } from '@react-pdf/renderer'
 import { FileDown, LoaderCircle, Save, Search } from 'lucide-react'
 import './App.css'
@@ -67,6 +67,22 @@ function App() {
   const [treeCostMethod, setTreeCostMethod] = useState('')
   const [saveScenarioOpen, setSaveScenarioOpen] = useState(false)
   const [saveScenarioError, setSaveScenarioError] = useState('')
+
+  const handlePdfShortcut = useEffectEvent(() => {
+    if (!tree.length || loading.tree || loading.pdf) return
+    savePdf()
+  })
+
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key !== 'F3' || event.repeat) return
+      event.preventDefault()
+      handlePdfShortcut()
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   async function openStockDialog() {
     setMessage('')
@@ -710,6 +726,7 @@ function App() {
                 variant="outline"
                 onClick={savePdf}
                 disabled={!tree.length || loading.tree || loading.pdf}
+                title="PDF Kaydet (F3)"
               >
                 {loading.pdf ? (
                   <LoaderCircle className="loading-icon" data-icon="inline-start" />

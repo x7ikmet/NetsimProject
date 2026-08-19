@@ -9,10 +9,12 @@ import {
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AppSidebar } from './AppSidebar'
 import { ScenariosPage } from '../pages/ScenariosPage'
+import { SettingsPage } from '../pages/SettingsPage'
 import './AppShell.css'
 
 function currentPathname() {
-  return window.location.pathname === '/scenarios' ? '/scenarios' : '/'
+  const pathname = window.location.pathname
+  return ['/scenarios', '/settings'].includes(pathname) ? pathname : '/'
 }
 
 export function AppShell({ children, user, error, submitting, onLogout }) {
@@ -66,6 +68,7 @@ export function AppShell({ children, user, error, submitting, onLogout }) {
             {children}
           </div>
           {pathname === '/scenarios' ? <ScenariosPage /> : null}
+          {pathname === '/settings' ? <SettingsPage /> : null}
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>

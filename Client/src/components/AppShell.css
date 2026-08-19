@@ -78,6 +78,20 @@
 }
 
 .app-sidebar-footer {
+  gap: 8px;
+}
+
+.app-utility-navigation [data-slot='sidebar-menu-button'] {
+  min-height: 38px;
+  border: 1px solid transparent;
+}
+
+.app-utility-navigation [data-active] {
+  border-color: var(--sidebar-border);
+}
+
+.app-user-menu {
+  padding-top: 8px;
   border-top: 1px solid var(--sidebar-border);
 }
 
@@ -127,6 +141,15 @@
   padding: 16px;
 }
 
+.settings-page {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+}
+
 .scenarios-page-header h1 {
   margin: 0;
   color: var(--hs-navy, #213343);
@@ -139,6 +162,67 @@
   margin: 6px 0 0;
   color: var(--muted-foreground);
   font-size: 14px;
+}
+
+.settings-page-header h1 {
+  margin: 0;
+  color: var(--hs-navy, #213343);
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+
+.shortcut-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shortcut-item {
+  display: flex;
+  min-height: 62px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.shortcut-item:first-child {
+  border-top: 0;
+}
+
+.shortcut-description {
+  display: grid;
+  gap: 3px;
+}
+
+.shortcut-description strong {
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.shortcut-description span {
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.shortcut-key {
+  min-width: 42px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-bottom-width: 3px;
+  border-radius: 7px;
+  color: var(--foreground);
+  background: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .scenarios-placeholder {

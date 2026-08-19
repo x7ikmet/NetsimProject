@@ -1,4 +1,4 @@
-import { Bookmark, Building2, Network, UserRound } from 'lucide-react'
+import { Bookmark, Building2, Network, Settings, UserRound } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -93,7 +93,29 @@ export function AppSidebar({ pathname, username, onNavigate }) {
       </SidebarContent>
 
       <SidebarFooter className="app-sidebar-footer">
-        <SidebarMenu>
+        <SidebarMenu className="app-utility-navigation">
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              className="group-data-[collapsible=icon]:min-h-8! group-data-[collapsible=icon]:justify-center"
+              isActive={pathname === '/settings'}
+              size="lg"
+              tooltip="Ayarlar"
+              render={
+                <a
+                  href="/settings"
+                  onClick={(event) => handleNavigate(event, '/settings')}
+                />
+              }
+            >
+              <Settings />
+              <span className="group-data-[collapsible=icon]:hidden">
+                Ayarlar
+              </span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+
+        <SidebarMenu className="app-user-menu">
           <SidebarMenuItem>
             <SidebarMenuButton className="app-user" size="lg" render={<div />}>
               <span
