@@ -45,18 +45,21 @@ test('PDF rows include every tree node in display order', () => {
 
 test('parents inherit child currency after build and variant replacement', async () => {
   const originalFetch = globalThis.fetch
-  globalThis.fetch = async () => ({
-    ok: true,
-    json: async () => ({
-      data: {
-        dataset: [
-          { SEVIYE: 0, ANA_MALIYET: 10 },
-          { SEVIYE: 1, ANA_MALIYET: 10 },
-          { SEVIYE: 2, ANA_MALIYET: 10, DOVIZ_BIRIMI: 'USD' },
-        ],
-      },
-    }),
-  })
+  globalThis.fetch = async (url) =>
+    String(url).endsWith('/auth/csrf')
+      ? { ok: true, json: async () => ({ token: 'test-token' }) }
+      : {
+          ok: true,
+          json: async () => ({
+            data: {
+              dataset: [
+                { SEVIYE: 0, ANA_MALIYET: 10 },
+                { SEVIYE: 1, ANA_MALIYET: 10 },
+                { SEVIYE: 2, ANA_MALIYET: 10, DOVIZ_BIRIMI: 'USD' },
+              ],
+            },
+          }),
+        }
 
   try {
     const [root] = await buildProductTree({ stokVaryantNo: 1 })

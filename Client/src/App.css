@@ -305,6 +305,29 @@ button:disabled {
   padding: 0;
 }
 
+.bom-tree-editor {
+  display: grid;
+  grid-template-columns: minmax(12rem, 2fr) minmax(12rem, 2fr) minmax(7rem, 1fr) minmax(7rem, 1fr) auto;
+  align-items: end;
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+.bom-tree-editor [data-slot="button"] {
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.bom-tree-editor-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.bom-tanstack-table .align-right {
+  display: block;
+  text-align: right;
+}
+
 .bom-table-scroll {
   height: 486px;
 }
