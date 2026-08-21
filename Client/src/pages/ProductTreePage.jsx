@@ -44,6 +44,7 @@ const initialLoadingState = {
   rowVariants: false,
   extraVariants: false,
   extraTree: false,
+  excel: false,
   pdf: false,
   scenario: false,
   tree: false,
@@ -79,7 +80,7 @@ export function ProductTreePage() {
   const [treeCostMethod, setTreeCostMethod] = useState('')
   const [saveScenarioOpen, setSaveScenarioOpen] = useState(false)
   const [saveScenarioError, setSaveScenarioError] = useState('')
-  const [pdfColumnIds, setPdfColumnIds] = useState(null)
+  const [visibleColumnIds, setVisibleColumnIds] = useState(null)
 
   const handlePdfShortcut = useEffectEvent(() => {
     if (!tree.length || loading.tree || loading.pdf) return
@@ -524,7 +525,7 @@ export function ProductTreePage() {
               ?.label ?? reportCostMethod
           }
           tree={tree}
-          visibleColumnIds={pdfColumnIds}
+          visibleColumnIds={visibleColumnIds}
         />,
       ).toBlob()
       const url = URL.createObjectURL(blob)
@@ -542,6 +543,41 @@ export function ProductTreePage() {
       setMessage(`PDF oluşturulamadı: ${error.message}`)
     } finally {
       setLoadingField('pdf', false)
+    }
+  }
+
+  async function saveExcel() {
+    setMessage('')
+    setLoadingField('excel', true)
+
+    try {
+      const { saveProductTreeExcel } = await import(
+        '../utils/productTreeExcel'
+      )
+      const stockCode = String(selectedStock?.STOK_KODU ?? 'urun-agaci').replace(
+        /[<>:"/\\|?*]/g,
+        '-',
+      )
+
+      saveProductTreeExcel(
+        tree,
+        visibleColumnIds,
+        `urun-agaci-${stockCode}.xlsx`,
+        {
+          stock: `${selectedStock?.STOK_KODU ?? ''} - ${selectedStock?.STOK_ADI ?? ''}`,
+          variant: `${selectedVariant?.VARYANT_KODU ?? ''} - ${selectedVariant?.VARYANT_ADI ?? ''}`,
+          quantity: tree[0]?.MIKTAR ?? quantity,
+          unit: tree[0]?.BIRIM ?? unit,
+          costMethod:
+            costMethods.find(
+              (method) => method.value === (treeCostMethod || costMethod),
+            )?.label ?? (treeCostMethod || costMethod),
+        },
+      )
+    } catch (error) {
+      setMessage(`Excel oluşturulamadı: ${error.message}`)
+    } finally {
+      setLoadingField('excel', false)
     }
   }
 
@@ -750,11 +786,15 @@ export function ProductTreePage() {
               <Button
                 type="button"
                 variant="outline"
-                disabled
-                title="Yakında"
+                onClick={saveExcel}
+                disabled={!tree.length || loading.tree || loading.excel}
               >
-                <FileSpreadsheet data-icon="inline-start" />
-                Excel Kaydet
+                {loading.excel ? (
+                  <LoaderCircle className="loading-icon" data-icon="inline-start" />
+                ) : (
+                  <FileSpreadsheet data-icon="inline-start" />
+                )}
+                {loading.excel ? 'Excel oluşturuluyor...' : 'Excel Kaydet'}
               </Button>
             </div>
           </div>
@@ -790,7 +830,7 @@ export function ProductTreePage() {
             onExtraSubmit={addExtraRow}
             onExtraEdit={editExtraRow}
             onExtraRemove={removeExtraRow}
-            onVisibleColumnIdsChange={setPdfColumnIds}
+            onVisibleColumnIdsChange={setVisibleColumnIds}
           />
         </section>
       </div>
