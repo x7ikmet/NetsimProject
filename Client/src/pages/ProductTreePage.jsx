@@ -80,6 +80,7 @@ export function ProductTreePage() {
   const [treeCostMethod, setTreeCostMethod] = useState('')
   const [saveScenarioOpen, setSaveScenarioOpen] = useState(false)
   const [saveScenarioError, setSaveScenarioError] = useState('')
+  const [pdfColumnIds, setPdfColumnIds] = useState(null)
 
   const handlePdfShortcut = useEffectEvent(() => {
     if (!tree.length || loading.tree || loading.pdf) return
@@ -524,6 +525,7 @@ export function ProductTreePage() {
               ?.label ?? reportCostMethod
           }
           tree={tree}
+          visibleColumnIds={pdfColumnIds}
         />,
       ).toBlob()
       const url = URL.createObjectURL(blob)
@@ -799,6 +801,7 @@ export function ProductTreePage() {
             onExtraSubmit={addExtraRow}
             onExtraEdit={editExtraRow}
             onExtraRemove={removeExtraRow}
+            onVisibleColumnIdsChange={setPdfColumnIds}
           />
         </section>
       </div>

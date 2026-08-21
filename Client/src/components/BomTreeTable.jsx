@@ -49,6 +49,7 @@ export function BomTreeTable({
   onExtraSubmit,
   onExtraEdit,
   onExtraRemove,
+  onVisibleColumnIdsChange,
 }) {
   const parentById = useMemo(() => indexParents(rows), [rows])
   const columns = useMemo(
@@ -228,6 +229,7 @@ export function BomTreeTable({
               }}
               searchPlaceholder="Ürün ağacında ara..."
               className="bom-modern-table bom-tanstack-table"
+              onVisibleColumnIdsChange={onVisibleColumnIdsChange}
               renderAfterRow={(row, columnCount) =>
                 extraDraft?.parent.treeId === row.id ? (
                   <ExtraEditorRow

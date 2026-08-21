@@ -3,6 +3,7 @@ import { after, test } from 'node:test'
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { createServer } from 'vite'
+import { getProductTreePdfColumns } from '../productTreePdfColumns.js'
 
 const vite = await createServer({
   appType: 'custom',
@@ -17,7 +18,6 @@ const {
 const { updateTreeSelection } = await vite.ssrLoadModule(
   '/src/components/tree-table/treeSelection.js',
 )
-
 after(() => vite.close())
 
 test('expanded tree rows render with selection and hierarchy', () => {
@@ -63,4 +63,17 @@ test('selecting a tree row includes every descendant', () => {
   const selected = updateTreeSelection({}, parent, true)
   assert.deepEqual(selected, { parent: true, child: true })
   assert.deepEqual(updateTreeSelection(selected, parent, false), {})
+})
+
+test('PDF columns follow visible tree-table columns', () => {
+  const columns = getProductTreePdfColumns(['line', 'stockName', 'amount'])
+
+  assert.deepEqual(
+    columns.map((column) => column.id),
+    ['line', 'stockName', 'amount'],
+  )
+  assert.equal(
+    Math.round(columns.reduce((total, column) => total + column.width, 0)),
+    792,
+  )
 })

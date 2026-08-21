@@ -68,6 +68,7 @@ export function TreeTable({
   searchPlaceholder = 'Tabloda ara...',
   renderAfterRow,
   renderToolbar,
+  onVisibleColumnIdsChange,
   emptyMessage = 'Gösterilecek kayıt yok.',
   className,
 }) {
@@ -116,6 +117,7 @@ export function TreeTable({
       <TreeTableToolbar
         table={table}
         searchPlaceholder={searchPlaceholder}
+        onVisibleColumnIdsChange={onVisibleColumnIdsChange}
       >
         {renderToolbar?.(table)}
       </TreeTableToolbar>
@@ -249,7 +251,12 @@ export function TreeTableNode({ row, children }) {
   )
 }
 
-function TreeTableToolbar({ table, searchPlaceholder, children }) {
+function TreeTableToolbar({
+  table,
+  searchPlaceholder,
+  onVisibleColumnIdsChange,
+  children,
+}) {
   return (
     <div className="tree-table-toolbar">
       <Input
@@ -280,7 +287,20 @@ function TreeTableToolbar({ table, searchPlaceholder, children }) {
                 <input
                   type="checkbox"
                   checked={column.getIsVisible()}
-                  onChange={column.getToggleVisibilityHandler()}
+                  onChange={(event) => {
+                    const isVisible = event.target.checked
+                    column.toggleVisibility(isVisible)
+                    onVisibleColumnIdsChange?.(
+                      table
+                        .getAllLeafColumns()
+                        .filter((item) =>
+                          item.id === column.id
+                            ? isVisible
+                            : item.getIsVisible(),
+                        )
+                        .map((item) => item.id),
+                    )
+                  }}
                 />
                 {column.columnDef.meta?.label ?? column.id}
               </label>

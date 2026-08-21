@@ -8,6 +8,7 @@ import {
 } from '@react-pdf/renderer'
 import { formatValue } from '../utils/formatters'
 import { flattenProductTree } from '../utils/productTree'
+import { getProductTreePdfColumns } from './productTreePdfColumns'
 
 const notoSansRegular = new URL(
   '../assets/fonts/NotoSans-Regular.ttf',
@@ -26,36 +27,6 @@ Font.register({
   ],
 })
 Font.registerHyphenationCallback((word) => [word])
-
-const columns = [
-  { label: 'Satır', width: 28, value: (_, index) => index + 1, numeric: true },
-  { label: 'Stok Kodu', width: 64, value: (row) => row.STOK_KODU },
-  { label: 'Stok Adı', width: 120, value: (row) => row.STOK_ADI, indent: true },
-  { label: 'Varyant Kodu', width: 70, value: (row) => row.VARYANT_KODU },
-  { label: 'Varyant Adı', width: 138, value: (row) => row.VARYANT_ADI },
-  { label: 'Miktar', width: 44, value: (row) => row.MIKTAR, numeric: true },
-  { label: 'Birim', width: 38, value: (row) => row.BIRIM },
-  {
-    label: 'Birim Fiyat',
-    width: 64,
-    value: (row) => row.BIRIM_FIYAT,
-    numeric: true,
-  },
-  { label: 'Tutar', width: 64, value: (row) => row.TUTAR, numeric: true },
-  {
-    label: 'Ana Maliyet',
-    width: 74,
-    value: (row) => row.ANA_MALIYET,
-    numeric: true,
-  },
-  { label: 'Döviz', width: 46, value: (row) => row.DOVIZ_BIRIMI },
-  {
-    label: 'Seviye',
-    width: 42,
-    value: (row) => row.SEVIYE ?? row.depth,
-    numeric: true,
-  },
-]
 
 const styles = StyleSheet.create({
   page: {
@@ -123,8 +94,10 @@ export default function ProductTreePdf({
   unit,
   costMethod,
   tree,
+  visibleColumnIds,
 }) {
   const rows = flattenProductTree(tree)
+  const reportColumns = getProductTreePdfColumns(visibleColumnIds)
   const totalCost = tree.reduce(
     (total, row) => total + (Number(row.ANA_MALIYET) || 0),
     0,
@@ -173,7 +146,7 @@ export default function ProductTreePdf({
         <Text style={styles.tableTitle}>Ağaç Satırları</Text>
         <View style={styles.table}>
           <View style={[styles.row, styles.header]} wrap={false}>
-            {columns.map((column) => (
+            {reportColumns.map((column) => (
               <View
                 key={column.label}
                 style={[
@@ -197,7 +170,7 @@ export default function ProductTreePdf({
               ]}
               wrap={false}
             >
-              {columns.map((column) => (
+              {reportColumns.map((column) => (
                 <View
                   key={column.label}
                   style={[
