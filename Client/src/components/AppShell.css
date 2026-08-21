@@ -58,8 +58,13 @@
 }
 
 .app-brand-mark {
-  color: var(--sidebar-primary-foreground);
-  background: var(--sidebar-primary);
+  overflow: hidden;
+}
+
+.app-brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .app-user-mark {
@@ -93,11 +98,7 @@
 
 .app-navigation [data-slot='sidebar-menu-button'] {
   min-height: 42px;
-  border: 1px solid var(--sidebar-border);
-}
-
-.app-navigation [data-active] {
-  border-color: var(--sidebar-border);
+  border: 0;
 }
 
 .app-sidebar-footer {

@@ -4,7 +4,6 @@ import {
   FileDown,
   FileSpreadsheet,
   LoaderCircle,
-  PackageCheck,
   Search,
 } from 'lucide-react'
 import '../App.css'
@@ -732,16 +731,6 @@ export function ProductTreePage() {
             aria-label="Kayıt ve dışa aktarma işlemleri"
           >
             <div className="save-actions">
-
-              <Button
-                type="button"
-                variant="outline"
-                disabled
-                title="Yakında"
-              >
-                <PackageCheck data-icon="inline-start" />
-                Varyant Kaydet
-              </Button>
 
               <Button
                 type="button"

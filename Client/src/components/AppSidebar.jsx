@@ -1,4 +1,4 @@
-import { Bookmark, Building2, Network, Settings, UserRound } from 'lucide-react'
+import { Bookmark, Network, Settings, UserRound } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -51,7 +51,10 @@ export function AppSidebar({ pathname, username, onNavigate }) {
                 className="app-brand-mark size-9 group-data-[collapsible=icon]:size-8"
                 aria-hidden="true"
               >
-                <Building2 />
+                <img
+                  src="https://www.netsim.com.tr/NSResources.nsx?r=/files/Image/Anasayfa/Cozumler/iconN4.png"
+                  alt=""
+                />
               </span>
               <span className="group-data-[collapsible=icon]:hidden">
                 <strong>Netsim</strong>
