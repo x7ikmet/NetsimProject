@@ -19,13 +19,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { getStokKartlar, getVaryantsByStokId } from '../api/stokApi'
-import { createScenario } from '../api/scenarioApi'
 import { LookupDialog } from '../components/LookupDialog'
 import { BomStudioTable } from '../components/BomStudioTable'
 import { BomTreeTable } from '../components/BomTreeTable'
 import ProductTreePdf from '../components/ProductTreePdf'
 import { SelectorField } from '../components/SelectorField'
-import { SaveScenarioDialog } from '../components/SaveScenarioDialog'
 import { costMethods } from '../config/productTree'
 import { stockColumns, variantColumns } from '../config/tableColumns'
 import { getStockLabel, getVariantLabel } from '../utils/formatters'
@@ -46,7 +44,6 @@ const initialLoadingState = {
   extraTree: false,
   excel: false,
   pdf: false,
-  scenario: false,
   tree: false,
 }
 
@@ -78,8 +75,6 @@ export function ProductTreePage() {
   const [quantity, setQuantity] = useState('1')
   const [costMethod, setCostMethod] = useState(costMethods[0].value)
   const [treeCostMethod, setTreeCostMethod] = useState('')
-  const [saveScenarioOpen, setSaveScenarioOpen] = useState(false)
-  const [saveScenarioError, setSaveScenarioError] = useState('')
   const [visibleColumnIds, setVisibleColumnIds] = useState(null)
 
   const handlePdfShortcut = useEffectEvent(() => {
@@ -581,71 +576,9 @@ export function ProductTreePage() {
     }
   }
 
-//   function openSaveScenario() {
-//     setMessage('')
-//     setSaveScenarioError('')
-//     setSaveScenarioOpen(true)
-//   }
 
-  async function saveScenario(name) {
-    const root = tree[0]
-    const scenarioQuantity = Number(root?.MIKTAR ?? quantity)
-    const totalCost = tree.reduce(
-      (total, node) => total + (Number(node.ANA_MALIYET) || 0),
-      0,
-    )
 
-    setSaveScenarioError('')
-    setLoadingField('scenario', true)
-
-    try {
-      const saved = await createScenario({
-        name,
-        stockNo: Number(selectedStock.STOK_NO),
-        stockCode: String(selectedStock.STOK_KODU ?? ''),
-        stockName: String(selectedStock.STOK_ADI ?? ''),
-        stockVariantNo: selectedVariant?.STOK_VARYANT_NO
-          ? Number(selectedVariant.STOK_VARYANT_NO)
-          : null,
-        variantCode: selectedVariant?.VARYANT_KODU ?? null,
-        variantName: selectedVariant?.VARYANT_ADI ?? null,
-        quantity: scenarioQuantity,
-        unit: String(root?.BIRIM ?? unit),
-        costMethod: treeCostMethod || costMethod,
-        totalCost,
-        currency: root?.DOVIZ_BIRIMI ?? null,
-        snapshot: {
-          schemaVersion: 1,
-          stock: {
-            STOK_NO: selectedStock.STOK_NO,
-            STOK_KODU: selectedStock.STOK_KODU,
-            STOK_ADI: selectedStock.STOK_ADI,
-            BIRIM1: selectedStock.BIRIM1,
-          },
-          variant: selectedVariant
-            ? {
-                STOK_VARYANT_NO: selectedVariant.STOK_VARYANT_NO,
-                VARYANT_KODU: selectedVariant.VARYANT_KODU,
-                VARYANT_ADI: selectedVariant.VARYANT_ADI,
-                BIRIM: selectedVariant.BIRIM,
-              }
-            : null,
-          quantity: scenarioQuantity,
-          unit: String(root?.BIRIM ?? unit),
-          costMethod,
-          treeCostMethod: treeCostMethod || costMethod,
-          tree,
-        },
-      })
-
-      setSaveScenarioOpen(false)
-      setMessage(`“${saved.name}” senaryosu kaydedildi.`)
-    } catch (error) {
-      setSaveScenarioError(error.message)
-    } finally {
-      setLoadingField('scenario', false)
-    }
-  }
+    
 
   function setLoadingField(key, value) {
     setLoading((current) => ({ ...current, [key]: value }))
@@ -904,15 +837,7 @@ export function ProductTreePage() {
         />
       ) : null}
 
-      {saveScenarioOpen ? (
-        <SaveScenarioDialog
-          open
-          saving={loading.scenario}
-          error={saveScenarioError}
-          onOpenChange={setSaveScenarioOpen}
-          onSave={saveScenario}
-        />
-      ) : null}
+
     </div>
   )
 }

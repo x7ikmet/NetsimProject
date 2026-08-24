@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Netsim.Api.Features.Scenarios.Shared;
-using Netsim.Api.Infrastructure.Persistence.Configurations;
 
 namespace Netsim.Api.Infrastructure.Persistence;
 
@@ -11,8 +9,6 @@ public sealed class ApplicationDbContext(
     : IdentityDbContext(options)
 {
     public const int IdentityKeyLength = 64;
-
-    public DbSet<Scenario> Scenarios => Set<Scenario>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -34,7 +30,5 @@ public sealed class ApplicationDbContext(
             .Property(x => x.RoleId).HasMaxLength(IdentityKeyLength);
         builder.Entity<IdentityUserToken<string>>()
             .Property(x => x.UserId).HasMaxLength(IdentityKeyLength);
-
-        builder.ApplyConfiguration(new ScenarioConfiguration());
     }
 }

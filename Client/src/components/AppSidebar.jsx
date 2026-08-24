@@ -1,4 +1,4 @@
-import { Bookmark, Network, Settings, UserRound } from 'lucide-react'
+import { Network, Settings, UserRound } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +15,6 @@ import {
 
 const navigationItems = [
   { href: '/', label: 'Yeni Ürün Ağacı', icon: Network },
-  { href: '/scenarios', label: 'Kayıtlı Senaryolar', icon: Bookmark },
 ]
 
 export function AppSidebar({ pathname, username, onNavigate }) {
