@@ -10,6 +10,7 @@ const vite = await createServer({
 const {
   appendTreeChild,
   buildProductTree,
+  findTreeNode,
   flattenProductTree,
   getTreeTotalCost,
   removeExtraTreeNode,
@@ -17,6 +18,12 @@ const {
 } = await vite.ssrLoadModule('/src/utils/productTree.js')
 
 after(() => vite.close())
+
+test('finds a nested tree node by id', () => {
+  const child = { treeId: 'child', children: [] }
+  assert.equal(findTreeNode([{ treeId: 'root', children: [child] }], 'child'), child)
+  assert.equal(findTreeNode([], 'missing'), null)
+})
 
 test('PDF rows include every tree node in display order', () => {
   const rows = flattenProductTree([

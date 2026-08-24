@@ -1,4 +1,4 @@
-import { Network, Settings, UserRound } from 'lucide-react'
+import { ClipboardList, Network, Settings, UserRound } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -14,10 +14,10 @@ import {
 } from '@/components/ui/sidebar'
 
 const navigationItems = [
-  { href: '/', label: 'Yeni Ürün Ağacı', icon: Network },
+  { href: '/', label: 'Ürün Ağacı', icon: Network },
 ]
 
-export function AppSidebar({ pathname, username, onNavigate }) {
+export function AppSidebar({ pathname, username, canViewActivityLogs, onNavigate }) {
   const { setOpenMobile } = useSidebar()
 
   function handleNavigate(event, href) {
@@ -68,7 +68,12 @@ export function AppSidebar({ pathname, username, onNavigate }) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="app-navigation pt-[18px] group-data-[collapsible=icon]:pt-0">
-              {navigationItems.map((item) => (
+              {[
+                ...navigationItems,
+                ...(canViewActivityLogs
+                  ? [{ href: '/activity-logs', label: 'Log Kayıtları', icon: ClipboardList }]
+                  : []),
+              ].map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     className="group-data-[collapsible=icon]:min-h-8! group-data-[collapsible=icon]:justify-center"

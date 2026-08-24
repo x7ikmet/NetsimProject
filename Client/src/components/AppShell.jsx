@@ -9,24 +9,26 @@ import {
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AppSidebar } from './AppSidebar'
 import { SettingsPage } from '../pages/SettingsPage'
+import { ActivityLogsPage } from '../pages/ActivityLogsPage'
 import './AppShell.css'
 
-function currentPathname() {
+function currentPathname(canViewActivityLogs) {
   const pathname = window.location.pathname
-  return ['/settings'].includes(pathname) ? pathname : '/'
+  if (pathname === '/settings') return pathname
+  return pathname === '/activity-logs' && canViewActivityLogs ? pathname : '/'
 }
 
 export function AppShell({ children, user, error, submitting, onLogout }) {
-  const [pathname, setPathname] = useState(currentPathname)
+  const [pathname, setPathname] = useState(() => currentPathname(user.canViewActivityLogs))
 
   useEffect(() => {
     function handlePopState() {
-      setPathname(currentPathname())
+      setPathname(currentPathname(user.canViewActivityLogs))
     }
 
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
+  }, [user.canViewActivityLogs])
 
   function navigate(nextPathname) {
     if (nextPathname === pathname) return
@@ -61,6 +63,7 @@ export function AppShell({ children, user, error, submitting, onLogout }) {
           <AppSidebar
             pathname={pathname}
             username={user.username}
+            canViewActivityLogs={user.canViewActivityLogs}
             onNavigate={navigate}
           />
 
@@ -69,6 +72,7 @@ export function AppShell({ children, user, error, submitting, onLogout }) {
               {children}
             </div>
             {pathname === '/settings' ? <SettingsPage /> : null}
+            {pathname === '/activity-logs' ? <ActivityLogsPage /> : null}
           </SidebarInset>
         </div>
       </SidebarProvider>

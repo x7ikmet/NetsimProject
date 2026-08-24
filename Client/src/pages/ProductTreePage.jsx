@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { getStokKartlar, getVaryantsByStokId } from '../api/stokApi'
+import { createActivityLog } from '../api/activityLogApi'
 import { LookupDialog } from '../components/LookupDialog'
 import { BomStudioTable } from '../components/BomStudioTable'
 import { BomTreeTable } from '../components/BomTreeTable'
@@ -31,10 +32,24 @@ import {
   appendTreeChild,
   buildProductTree,
   collectExpandableIds,
+  findTreeNode,
   getTreeTotalCost,
   removeExtraTreeNode,
   replaceTreeVariant,
 } from '../utils/productTree'
+
+function activityValue(row) {
+  if (!row) return null
+  return {
+    stockCode: row.STOK_KODU ?? null,
+    variantCode: row.VARYANT_KODU ?? null,
+    quantity: Number(row.MIKTAR) || null,
+    unit: row.BIRIM ?? null,
+    unitPrice: Number(row.BIRIM_FIYAT) || 0,
+    totalCost: Number(row.ANA_MALIYET) || 0,
+    currency: row.DOVIZ_BIRIMI ?? null,
+  }
+}
 
 const initialLoadingState = {
   stocks: false,
@@ -76,6 +91,21 @@ export function ProductTreePage() {
   const [costMethod, setCostMethod] = useState(costMethods[0].value)
   const [treeCostMethod, setTreeCostMethod] = useState('')
   const [visibleColumnIds, setVisibleColumnIds] = useState(null)
+
+  function recordActivity(eventCode, row, oldValue, newValue) {
+    const source = row ?? selectedStock
+    return createActivityLog({
+      eventCode,
+      stockNo: Number(source?.STOK_NO ?? selectedStock?.STOK_NO),
+      stockVariantNo: (source?.STOK_VARYANT_NO ?? selectedVariant?.STOK_VARYANT_NO)
+        ? Number(source?.STOK_VARYANT_NO ?? selectedVariant?.STOK_VARYANT_NO)
+        : null,
+      stockCode: source?.STOK_KODU ?? selectedStock?.STOK_KODU ?? null,
+      variantCode: source?.VARYANT_KODU ?? selectedVariant?.VARYANT_KODU ?? null,
+      oldValue,
+      newValue,
+    })
+  }
 
   const handlePdfShortcut = useEffectEvent(() => {
     if (!tree.length || loading.tree || loading.pdf) return
@@ -200,14 +230,15 @@ export function ProductTreePage() {
         throw new Error('Seçilen varyant için maliyet ağacı bulunamadı.')
       }
 
-      setTree((current) => {
-        const result = replaceTreeVariant(
-          current,
-          targetRow.treeId,
-          replacement,
-        )
-        return result.replaced ? result.nodes : current
-      })
+      const result = replaceTreeVariant(tree, targetRow.treeId, replacement)
+      if (!result.replaced) throw new Error('Varyant satırı güncellenemedi.')
+      await recordActivity(
+        'VARYANT_DEGISTIR',
+        targetRow,
+        activityValue(targetRow),
+        activityValue(replacement),
+      )
+      setTree(result.nodes)
 
       if (Number(targetRow.SEVIYE) === 0) {
         setSelectedVariant(variant)
@@ -393,6 +424,9 @@ export function ProductTreePage() {
       return
     }
 
+    const previous = extraDraft.editingTreeId
+      ? findTreeNode(tree, extraDraft.editingTreeId)
+      : null
     const result = extraDraft.editingTreeId
       ? replaceTreeVariant(tree, extraDraft.editingTreeId, child)
       : appendTreeChild(tree, extraDraft.parent.treeId, child)
@@ -402,15 +436,38 @@ export function ProductTreePage() {
       return
     }
 
+    try {
+      await recordActivity(
+        extraDraft.editingTreeId ? 'BILESEN_DEGISTIR' : 'BILESEN_EKLE',
+        child,
+        activityValue(previous),
+        activityValue(child),
+      )
+    } catch (error) {
+      setMessage(error.message)
+      return
+    }
+
     setTree(result.nodes)
     cancelExtraRow()
   }
 
-  function removeExtraRow(treeId) {
-    setTree((current) => {
-      const result = removeExtraTreeNode(current, treeId)
-      return result.removed ? result.nodes : current
-    })
+  async function removeExtraRow(treeId) {
+    const removedRow = findTreeNode(tree, treeId)
+    const result = removeExtraTreeNode(tree, treeId)
+    if (!result.removed || !removedRow) return
+
+    try {
+      await recordActivity(
+        'BILESEN_SIL',
+        removedRow,
+        activityValue(removedRow),
+        null,
+      )
+      setTree(result.nodes)
+    } catch (error) {
+      setMessage(error.message)
+    }
   }
 
   function selectStock(stock) {
@@ -462,6 +519,12 @@ export function ProductTreePage() {
         maliyetYontemi: costMethod,
       })
 
+      if (nodes.length) {
+        await recordActivity('MLYT_HESAPLA', nodes[0], null, {
+          ...activityValue(nodes[0]),
+          costMethod,
+        })
+      }
       setTree(nodes)
       setTreeCostMethod(costMethod)
       setExpandedIds(new Set())
@@ -523,6 +586,10 @@ export function ProductTreePage() {
           visibleColumnIds={visibleColumnIds}
         />,
       ).toBlob()
+      await recordActivity('PDF_AKTAR', tree[0], null, {
+        ...activityValue(tree[0]),
+        rowCount: tree.length,
+      })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       const stockCode = String(selectedStock?.STOK_KODU ?? 'urun-agaci').replace(
@@ -554,6 +621,10 @@ export function ProductTreePage() {
         '-',
       )
 
+      await recordActivity('EXCEL_AKTAR', tree[0], null, {
+        ...activityValue(tree[0]),
+        rowCount: tree.length,
+      })
       saveProductTreeExcel(
         tree,
         visibleColumnIds,

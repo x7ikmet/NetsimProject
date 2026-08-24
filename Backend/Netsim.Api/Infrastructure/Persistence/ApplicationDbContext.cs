@@ -9,6 +9,7 @@ public sealed class ApplicationDbContext(
     : IdentityDbContext(options)
 {
     public const int IdentityKeyLength = 64;
+    public DbSet<CostActivityLog> ActivityLogs => Set<CostActivityLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -30,5 +31,8 @@ public sealed class ApplicationDbContext(
             .Property(x => x.RoleId).HasMaxLength(IdentityKeyLength);
         builder.Entity<IdentityUserToken<string>>()
             .Property(x => x.UserId).HasMaxLength(IdentityKeyLength);
+
+        builder.HasSequence<int>("MALIYET_LOG_NO");
+        builder.ApplyConfiguration(new CostActivityLogConfiguration());
     }
 }

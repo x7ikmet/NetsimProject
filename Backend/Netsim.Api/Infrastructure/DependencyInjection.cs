@@ -1,8 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Netsim.Api.Features.ActivityLogs;
 using Netsim.Api.Infrastructure.Authentication;
 using Netsim.Api.Infrastructure.Persistence;
 using Yarp.ReverseProxy.Configuration;
@@ -27,8 +29,10 @@ public static class DependencyInjection
         services
             .AddIdentityCore<IdentityUser>(options =>
                 options.Stores.MaxLengthForKeys = ApplicationDbContext.IdentityKeyLength)
+            .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddSignInManager();
+        services.AddScoped<ActivityLogWriter>();
 
         var jwtOptions = JwtOptions.FromConfiguration(configuration);
         services.AddSingleton(jwtOptions);
@@ -49,6 +53,7 @@ public static class DependencyInjection
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromSeconds(30),
                     NameClaimType = JwtRegisteredClaimNames.UniqueName,
+                    RoleClaimType = ClaimTypes.Role,
                 };
                 options.Events = new JwtBearerEvents
                 {
@@ -59,7 +64,10 @@ public static class DependencyInjection
                     },
                 };
             });
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+            options.AddPolicy(
+                ActivityLogAuthorization.ManagerPolicy,
+                policy => policy.RequireRole(ActivityLogAuthorization.ManagerRole)));
 
         var clientOrigin = configuration["CLIENT_ORIGIN"]
             ?? throw new InvalidOperationException("CLIENT_ORIGIN is missing.");

@@ -64,6 +64,15 @@ export function flattenProductTree(nodes, depth = 0) {
   ])
 }
 
+export function findTreeNode(nodes, treeId) {
+  for (const node of nodes) {
+    if (node.treeId === treeId) return node
+    const match = findTreeNode(node.children ?? [], treeId)
+    if (match) return match
+  }
+  return null
+}
+
 export function getTreeTotalCost(node) {
   const costRows = node.children?.length ? node.children : [node]
 
