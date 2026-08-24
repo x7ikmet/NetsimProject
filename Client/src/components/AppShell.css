@@ -184,14 +184,6 @@
   flex: 1;
 }
 
-.scenarios-page {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 14px;
-  padding: 16px;
-}
 
 .settings-page {
   display: flex;
@@ -202,19 +194,6 @@
   padding: 16px;
 }
 
-.scenarios-page-header h1 {
-  margin: 0;
-  color: var(--hs-navy, #213343);
-  font-size: clamp(26px, 3vw, 38px);
-  font-weight: 650;
-  letter-spacing: -0.04em;
-}
-
-.scenarios-page-header p {
-  margin: 6px 0 0;
-  color: var(--muted-foreground);
-  font-size: 14px;
-}
 
 .settings-page-header h1 {
   margin: 0;
@@ -277,15 +256,7 @@
   white-space: nowrap;
 }
 
-.scenarios-placeholder {
-  flex: 1;
-  justify-content: center;
-  text-align: center;
-}
 
-.scenarios-placeholder [data-slot='card-header'] {
-  align-content: center;
-}
 
 @media (max-width: 767px) {
   .app-shell {
