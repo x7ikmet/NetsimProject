@@ -9,19 +9,19 @@ public sealed class JwtTokenService(JwtOptions options)
 {
     public const string CookieName = "netsim_access_token";
 
-    public TokenResponse Create(IdentityUser user)
+    public TokenResponse Create(IdentityUser user, IEnumerable<string> roles)
     {
         var now = DateTime.UtcNow;
         var expiresAt = now.AddMinutes(30);
 
-        var claims = new[]
+        var sessionId = Guid.NewGuid().ToString();
+        var claims = new List<Claim>
         {
-          new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-          new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName!),
-          new Claim(
-            JwtRegisteredClaimNames.Jti,
-            Guid.NewGuid().ToString()) 
+            new(JwtRegisteredClaimNames.Sub, user.Id),
+            new(JwtRegisteredClaimNames.UniqueName, user.UserName!),
+            new(JwtRegisteredClaimNames.Jti, sessionId),
         };
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var credentials = new SigningCredentials(
             new SymmetricSecurityKey(options.Key),
@@ -37,12 +37,14 @@ public sealed class JwtTokenService(JwtOptions options)
 
         return new TokenResponse(
             new JwtSecurityTokenHandler().WriteToken(token),
-            expiresAt
+            expiresAt,
+            sessionId
         );
     }
 }
 
 public sealed record TokenResponse(
     string AccessToken,
-    DateTime ExpiresAtUtc
+    DateTime ExpiresAtUtc,
+    string SessionId
 );
