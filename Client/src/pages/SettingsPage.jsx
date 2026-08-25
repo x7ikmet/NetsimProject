@@ -11,6 +11,11 @@ const shortcuts = [
     label: 'PDF Kaydet',
     description: 'Hazırlanan ürün ağacını PDF olarak indirir.',
   },
+  {
+    key: 'F4',
+    label: 'Excel Kaydet',
+    description: 'Hazırlanan ürün ağacını Excel olarak indirir.',
+  },
 ]
 
 export function SettingsPage() {

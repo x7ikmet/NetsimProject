@@ -107,16 +107,17 @@ export function ProductTreePage() {
     })
   }
 
-  const handlePdfShortcut = useEffectEvent(() => {
-    if (!tree.length || loading.tree || loading.pdf) return
-    savePdf()
+  const handleExportShortcut = useEffectEvent((key) => {
+    if (!tree.length || loading.tree) return
+    if (key === 'F3' && !loading.pdf) savePdf()
+    if (key === 'F4' && !loading.excel) saveExcel()
   })
 
   useEffect(() => {
     function handleKeyDown(event) {
-      if (event.key !== 'F3' || event.repeat) return
+      if ((event.key !== 'F3' && event.key !== 'F4') || event.repeat) return
       event.preventDefault()
-      handlePdfShortcut()
+      handleExportShortcut(event.key)
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -792,6 +793,7 @@ export function ProductTreePage() {
                 variant="outline"
                 onClick={saveExcel}
                 disabled={!tree.length || loading.tree || loading.excel}
+                title="Excel Kaydet (F4)"
               >
                 {loading.excel ? (
                   <LoaderCircle className="loading-icon" data-icon="inline-start" />
