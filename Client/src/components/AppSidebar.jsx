@@ -1,4 +1,4 @@
-import { ClipboardList, Network, Settings, UserRound } from 'lucide-react'
+import { Boxes, ClipboardList, Network, Settings, UserRound } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +15,7 @@ import {
 
 const navigationItems = [
   { href: '/', label: 'Ürün Ağacı', icon: Network },
+  { href: '/stok-kartlari', label: 'Stok Kartları', icon: Boxes },
 ]
 
 export function AppSidebar({ pathname, username, canViewActivityLogs, onNavigate }) {

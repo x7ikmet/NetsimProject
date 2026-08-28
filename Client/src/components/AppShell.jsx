@@ -10,12 +10,21 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { AppSidebar } from './AppSidebar'
 import { SettingsPage } from '../pages/SettingsPage'
 import { ActivityLogsPage } from '../pages/ActivityLogsPage'
+import { StockCardsPage } from '../pages/StockCardsPage'
 import './AppShell.css'
 
 function currentPathname(canViewActivityLogs) {
   const pathname = window.location.pathname
   if (pathname === '/settings') return pathname
+  if (pathname === '/stok-kartlari') return pathname
   return pathname === '/activity-logs' && canViewActivityLogs ? pathname : '/'
+}
+
+const pageTitles = {
+  '/': 'Ürün Ağacı Maliyet Aracı',
+  '/stok-kartlari': 'Stok Kartları',
+  '/activity-logs': 'Log Kayıtları',
+  '/settings': 'Ayarlar',
 }
 
 export function AppShell({ children, user, error, submitting, onLogout }) {
@@ -41,7 +50,7 @@ export function AppShell({ children, user, error, submitting, onLogout }) {
       <SidebarProvider className="app-shell">
         <header className="app-topbar">
           <SidebarTrigger className="app-sidebar-trigger" />
-          <span className="app-topbar-title">Ürün Ağacı Maliyet Aracı</span>
+          <span className="app-topbar-title">{pageTitles[pathname]}</span>
           <div className="app-topbar-spacer" />
           {error ? <p role="alert">{error}</p> : null}
           <Button
@@ -71,6 +80,7 @@ export function AppShell({ children, user, error, submitting, onLogout }) {
             <div className="app-route" hidden={pathname !== '/'}>
               {children}
             </div>
+            {pathname === '/stok-kartlari' ? <StockCardsPage /> : null}
             {pathname === '/settings' ? <SettingsPage /> : null}
             {pathname === '/activity-logs' ? <ActivityLogsPage /> : null}
           </SidebarInset>

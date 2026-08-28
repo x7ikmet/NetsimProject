@@ -217,8 +217,8 @@ export function ActivityLogsPage() {
       <footer className="activity-pagination">
         <span>Sayfa {page} / {pageCount}</span>
         <div>
-          <Button type="button" variant="outline" disabled={page === 1 || loading} onClick={() => changePage(page - 1)}>Önceki</Button>
-          <Button type="button" variant="outline" disabled={page === pageCount || loading} onClick={() => changePage(page + 1)}>Sonraki</Button>
+          <Button type="button" variant="outline" disabled={page === 1 || loading} onClick={() => changePage(page - 1)}></Button>
+          <Button type="button" variant="outline" disabled={page === pageCount || loading} onClick={() => changePage(page + 1)}></Button>
         </div>
       </footer>
 

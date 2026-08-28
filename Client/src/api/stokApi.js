@@ -27,7 +27,7 @@ function normalizeDataset(response) {
   )
 }
 
-async function requestJson(path, options = {}) {
+async function requestJson(path, options = {}, normalize = normalizeDataset) {
   const method = (options.method ?? 'GET').toUpperCase()
   const requiresCsrf = !['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method)
   const csrfHeader = requiresCsrf
@@ -59,11 +59,37 @@ async function requestJson(path, options = {}) {
     throw new Error(payload?.message ?? 'ERP API returned an error')
   }
 
-  return normalizeDataset(payload)
+  return normalize(payload)
 }
 
 export function getStokKartlar() {
   return requestJson('/FastAPI/Stok/Kartlar', { method: 'GET' })
+}
+
+export function getFilteredStokKartlar(filters, signal) {
+  return requestJson(
+    '/FastAPI/Stok/KartlarFiltered',
+    {
+      method: 'POST',
+      cache: 'no-store',
+      signal,
+      body: JSON.stringify(filters),
+    },
+    (payload) => {
+      const items = normalizeDataset(payload)
+      const data = payload?.data ?? payload
+      const total = Number(
+        data?.total ??
+          data?.totalCount ??
+          data?.TOTAL_COUNT ??
+          data?.TOPLAM_KAYIT ??
+          items[0]?.TOPLAM_KAYIT ??
+          items[0]?.TOTAL_COUNT,
+      )
+
+      return { items, total: Number.isFinite(total) ? total : null }
+    },
+  )
 }
 
 export function getVaryantsByStokId(stokNo) {
